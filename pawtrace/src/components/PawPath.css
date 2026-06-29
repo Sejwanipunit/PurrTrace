@@ -1,0 +1,40 @@
+.paw-path {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--s-sm) 0;
+}
+
+.paw-path-horizontal {
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.paw-path-vertical {
+  flex-direction: column;
+}
+
+.paw-dash {
+  flex: 1;
+  height: 1.5px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--sprout-300) 0px,
+    var(--sprout-300) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  min-width: 12px;
+}
+
+.paw-path-vertical .paw-dash {
+  width: 1.5px;
+  height: 12px;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--sprout-300) 0px,
+    var(--sprout-300) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}

@@ -1,0 +1,219 @@
+.report-lost {
+  display: flex;
+  flex-direction: column;
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-md);
+  padding: calc(var(--s-md) + env(safe-area-inset-top, 0px)) var(--s-md) var(--s-md);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.report-body {
+  padding: var(--s-lg) var(--s-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-lg);
+}
+
+/* Step indicator */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-sm) 0;
+}
+
+.step-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.step-done .step-circle {
+  background: var(--sprout-500);
+  color: #fff;
+}
+.step-active .step-circle {
+  background: var(--coral-500);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(242, 96, 60, 0.3);
+}
+.step-future .step-circle {
+  background: var(--sand);
+  color: var(--bark-300);
+  border: 1.5px solid var(--border);
+}
+
+.step-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bark-500);
+  white-space: nowrap;
+}
+.step-active .step-label { color: var(--coral-700); }
+.step-done .step-label { color: var(--sprout-600); }
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  margin: 0 4px;
+  margin-bottom: 20px;
+  min-width: 20px;
+}
+.step-line-done {
+  background: var(--sprout-400);
+}
+
+/* Step content */
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-md);
+}
+
+/* Photo */
+.photo-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-sm);
+  padding: var(--s-2xl) var(--s-md);
+  width: 100%;
+  background: var(--sprout-50);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.photo-placeholder:hover {
+  background: var(--sprout-100);
+}
+.photo-preview {
+  position: relative;
+  width: 100%;
+}
+.photo-preview img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+.photo-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+
+/* Fields */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  color: var(--bark-700);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+}
+
+.field-input {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 13px var(--s-md);
+  font-size: 15px;
+  color: var(--bark-900);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+.field-input:focus {
+  border-color: var(--sprout-500);
+  box-shadow: 0 0 0 4px var(--sprout-100);
+}
+.field-input-error {
+  border-color: var(--coral-500) !important;
+  box-shadow: 0 0 0 4px var(--coral-50) !important;
+}
+.field-input::placeholder { color: var(--bark-300); }
+
+.field-textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.field-error {
+  color: var(--coral-700);
+}
+.field-hint {
+  color: var(--bark-500);
+}
+
+/* Location */
+.location-info-box {
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+  background: var(--sprout-50);
+  border-radius: var(--r-md);
+  padding: var(--s-md);
+}
+
+.report-summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-md);
+}
+.summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.step-nav {
+  display: flex;
+  gap: var(--s-sm);
+}
+.step-nav .btn { flex: 1; }

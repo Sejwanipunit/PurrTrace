@@ -1,0 +1,11 @@
+# Config for hosting on Netlify (ignored by other hosts).
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback so client-side routes (/map, /pet/:id) don't 404 on refresh.
+# Real files (assets, sw.js, manifest) are served first; everything else → index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

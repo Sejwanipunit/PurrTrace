@@ -1,0 +1,129 @@
+.login {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--cream);
+}
+
+.login-art {
+  position: relative;
+  height: 240px;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, var(--sprout-50), var(--sun-50));
+}
+
+.login-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(8px);
+  opacity: 0.55;
+}
+.login-blob-1 {
+  width: 200px; height: 200px;
+  background: var(--sprout-200);
+  top: -60px; left: -40px;
+}
+.login-blob-2 {
+  width: 170px; height: 170px;
+  background: var(--sun-200);
+  bottom: -50px; right: -30px;
+}
+
+.login-logo {
+  position: relative;
+  z-index: 1;
+  width: 100px;
+  height: 100px;
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: var(--sh-3);
+  display: grid;
+  place-items: center;
+}
+
+.login-body {
+  flex: 1;
+  padding: var(--s-xl) var(--s-lg) calc(var(--s-xl) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+
+.login-title {
+  color: var(--sprout-700);
+  margin-bottom: var(--s-sm);
+}
+
+.login-sub {
+  color: var(--bark-700);
+  margin-bottom: var(--s-md);
+}
+
+.login-features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-md);
+  margin: var(--s-md) 0 var(--s-xl);
+}
+
+.login-feature {
+  display: flex;
+  align-items: center;
+  gap: var(--s-md);
+  color: var(--bark-700);
+}
+
+.login-feature-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--r-md);
+  background: var(--sprout-50);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-sm);
+  width: 100%;
+  padding: 16px;
+  margin-top: auto;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  box-shadow: var(--sh-2);
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--bark-900);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s;
+}
+.google-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--sh-3);
+}
+.google-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.google-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.login-legal {
+  color: var(--bark-500);
+  text-align: center;
+  margin-top: var(--s-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .google-btn { transition: none; }
+  .login-blob { filter: none; }
+}

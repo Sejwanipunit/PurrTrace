@@ -1,0 +1,116 @@
+.home-feed {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: calc(var(--s-md) + env(safe-area-inset-top, 0px)) var(--s-md) var(--s-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-md);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.home-greeting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--sprout-100);
+  color: var(--sprout-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.home-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.home-search {
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+  background: var(--sand);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 10px var(--s-md);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.home-search:focus-within {
+  border-color: var(--sprout-500);
+  box-shadow: 0 0 0 4px var(--sprout-100);
+}
+
+.home-search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--bark-900);
+  min-width: 0;
+}
+.home-search-input::placeholder { color: var(--bark-300); }
+
+.home-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-md);
+  padding: var(--s-md);
+}
+
+.home-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-sm);
+}
+
+.filter-chips-row {
+  display: flex;
+  gap: var(--s-sm);
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.filter-chips-row::-webkit-scrollbar { display: none; }
+
+.pet-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-sm);
+}
+
+.home-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--s-sm);
+  padding: var(--s-2xl) var(--s-md);
+}
+
+.skeleton-card {
+  height: 106px;
+  background: linear-gradient(90deg, var(--sand) 25%, var(--border) 50%, var(--sand) 75%);
+  background-size: 200% 100%;
+  border-radius: var(--r-lg);
+  animation: skeleton 1.5s infinite;
+}
+
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-card { animation: none; }
+}

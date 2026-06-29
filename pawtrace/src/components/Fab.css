@@ -1,0 +1,38 @@
+.fab {
+  position: fixed;
+  bottom: calc(72px + max(20px, env(safe-area-inset-bottom)) + 16px);
+  right: calc(50% - 220px + 16px);
+  width: 58px;
+  height: 58px;
+  border-radius: var(--r-xl);
+  background: var(--coral-500);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sh-3);
+  z-index: 99;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+}
+
+.fab:hover {
+  transform: rotate(12deg) scale(1.05);
+  box-shadow: 0 16px 36px rgba(242, 96, 60, 0.4);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 440px) {
+  .fab {
+    right: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fab { transition: none; }
+  .fab:hover { transform: none; }
+}

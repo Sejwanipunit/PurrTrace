@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawTrace — Screen Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sprout-50:#EFF9E6;--sprout-100:#D9F1C2;--sprout-200:#BFE899;--sprout-300:#A2DC6E;
+  --sprout-400:#88CF4C;--sprout-500:#6FB833;--sprout-600:#579522;--sprout-700:#43741B;--sprout-900:#213A10;
+  --sun-100:#FCF5B9;--sun-200:#FAEC86;--sun-400:#F5D827;--sun-700:#8C7107;
+  --lagoon-50:#E7F5F2;--lagoon-100:#C2E7E0;--lagoon-300:#6BC6B8;--lagoon-500:#3EA094;--lagoon-700:#2A736A;
+  --coral-50:#FDEEE9;--coral-100:#FBD3C6;--coral-300:#F59478;--coral-500:#F2603C;--coral-700:#C2421F;
+  --cream:#FBFAF5;--surface:#FFFFFF;--sand:#F3F0E7;--border:#E6E1D5;
+  --bark-900:#2A271F;--bark-700:#4A463B;--bark-500:#6E6857;--bark-300:#A9A28E;
+  --r-sm:12px;--r-md:16px;--r-lg:20px;--r-xl:28px;--r-pill:999px;
+  --sh-1:0 1px 3px rgba(42,39,31,.06);--sh-2:0 4px 12px rgba(42,39,31,.08);
+  --sh-3:0 12px 28px rgba(42,39,31,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito Sans',sans-serif;background:#ECE8DD;color:var(--bark-900);
+  -webkit-font-smoothing:antialiased;padding:48px 20px;line-height:1.4;
+  background-image:radial-gradient(circle at 1px 1px,rgba(42,39,31,.05) 1px,transparent 0);background-size:22px 22px}
+.disp{font-family:'Fredoka',sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+
+.page-head{max-width:1200px;margin:0 auto 40px;text-align:center}
+.page-head .kick{display:inline-flex;gap:8px;align-items:center;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--r-pill);padding:6px 14px;font-weight:800;
+  font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--sprout-700);box-shadow:var(--sh-1)}
+.page-head h1{font-family:'Fredoka';font-weight:600;font-size:34px;margin:16px 0 6px;letter-spacing:-.01em}
+.page-head p{color:var(--bark-500);font-size:15px}
+
+.stage{max-width:1280px;margin:0 auto;display:flex;gap:40px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+.device-col{display:flex;flex-direction:column;align-items:center;gap:16px}
+.device-label{font-family:'Fredoka';font-weight:500;font-size:17px;color:var(--bark-700);
+  display:flex;align-items:center;gap:8px}
+.device-label .n{font-family:'JetBrains Mono';font-size:12px;background:var(--bark-900);color:var(--cream);
+  width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:500}
+
+/* phone frame */
+.phone{width:340px;height:720px;background:var(--bark-900);border-radius:42px;padding:11px;
+  box-shadow:var(--sh-3),0 0 0 2px rgba(255,255,255,.04) inset;position:relative}
+.screen{width:100%;height:100%;background:var(--cream);border-radius:32px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column}
+.notch{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:26px;
+  background:var(--bark-900);border-radius:0 0 16px 16px;z-index:50}
+
+/* status bar */
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:14px 22px 6px;
+  font-size:13px;font-weight:800;flex-shrink:0}
+.statusbar .icons{display:flex;gap:6px;align-items:center}
+
+/* app bar */
+.appbar{padding:6px 20px 14px;flex-shrink:0}
+.appbar .row{display:flex;justify-content:space-between;align-items:center}
+.appbar .hello{font-size:13px;color:var(--bark-500);font-weight:700}
+.appbar h2{font-family:'Fredoka';font-weight:600;font-size:24px;line-height:1.1}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--sprout-300),var(--lagoon-300));
+  border:2px solid var(--surface);box-shadow:var(--sh-1)}
+
+/* scroll body */
+.body{flex:1;overflow-y:auto;padding:0 20px 90px}
+.body::-webkit-scrollbar{display:none}
+
+/* search */
+.search{display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--r-pill);padding:12px 16px;margin-bottom:14px;color:var(--bark-300);font-weight:600;font-size:14px}
+
+/* chips */
+.chips{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:8px 14px;border-radius:var(--r-pill);font-weight:800;font-size:13px;
+  border:1.5px solid var(--border);background:var(--surface);color:var(--bark-700)}
+.chip.on{background:var(--sprout-500);color:#fff;border-color:var(--sprout-500)}
+
+/* alert */
+.alert{display:flex;gap:11px;align-items:flex-start;background:var(--coral-50);border:1px solid var(--coral-100);
+  border-left:4px solid var(--coral-500);border-radius:var(--r-md);padding:13px 14px;margin-bottom:18px}
+.alert .ic{width:30px;height:30px;border-radius:50%;background:var(--coral-500);color:#fff;display:grid;
+  place-items:center;flex-shrink:0}
+.alert h4{font-family:'Fredoka';font-weight:600;font-size:14px;color:var(--coral-700);margin-bottom:1px}
+.alert p{font-size:12px;color:var(--bark-700);line-height:1.35}
+
+/* section label */
+.sec-l{display:flex;justify-content:space-between;align-items:baseline;margin:4px 0 12px}
+.sec-l h3{font-family:'Fredoka';font-weight:500;font-size:18px}
+.sec-l a{font-size:12px;font-weight:800;color:var(--sprout-600)}
+
+/* badge */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:var(--r-pill);
+  font-weight:800;font-size:11px;letter-spacing:.02em}
+.badge .d{width:6px;height:6px;border-radius:50%}
+.b-lost{background:var(--coral-50);color:var(--coral-700)}.b-lost .d{background:var(--coral-500)}
+.b-found{background:var(--sprout-50);color:var(--sprout-700)}.b-found .d{background:var(--sprout-500)}
+.b-reunited{background:var(--lagoon-50);color:var(--lagoon-700)}.b-reunited .d{background:var(--lagoon-500)}
+.b-search{background:var(--sun-100);color:var(--sun-700)}.b-search .d{background:var(--sun-400)}
+
+/* pet card (feed) */
+.petcard{display:flex;gap:13px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:11px;box-shadow:var(--sh-1);margin-bottom:12px}
+.petcard .thumb{width:78px;height:78px;border-radius:var(--r-md);flex-shrink:0}
+.petcard .info{flex:1;min-width:0}
+.petcard .info h4{font-family:'Fredoka';font-weight:600;font-size:17px;margin-bottom:1px}
+.petcard .breed{font-size:12px;color:var(--bark-500);margin-bottom:7px}
+.petcard .meta{font-size:12px;color:var(--bark-700);font-weight:700;display:flex;align-items:center;gap:5px}
+.petcard .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+
+/* FAB */
+.fab{position:absolute;bottom:88px;right:20px;width:58px;height:58px;border-radius:var(--r-xl);
+  background:var(--coral-500);color:#fff;display:grid;place-items:center;box-shadow:0 8px 20px rgba(242,96,60,.4);z-index:40}
+
+/* bottom nav */
+.bnav{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-around;
+  background:var(--surface);border-top:1px solid var(--border);padding:11px 8px 20px;z-index:30}
+.nav-i{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--bark-300);
+  font-size:10px;font-weight:800;padding:5px 12px;border-radius:var(--r-md)}
+.nav-i.on{color:var(--sprout-600)}
+.nav-i.on .dot-i{color:var(--sprout-600)}
+
+/* ===== MAP screen ===== */
+.map{flex:1;position:relative;overflow:hidden;
+  background:
+    linear-gradient(0deg,rgba(110,198,184,.0),rgba(110,198,184,.0)),
+    repeating-linear-gradient(0deg,transparent,transparent 38px,rgba(42,39,31,.04) 39px,transparent 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 38px,rgba(42,39,31,.04) 39px,transparent 40px),
+    var(--lagoon-50)}
+.map .road{position:absolute;background:var(--surface);box-shadow:0 0 0 1px var(--border)}
+.map .road.h{height:18px;left:-10px;right:-10px}
+.map .road.v{width:18px;top:-10px;bottom:-10px}
+.map .park{position:absolute;background:var(--sprout-100);border-radius:18px;border:1.5px solid var(--sprout-200)}
+.pin{position:absolute;transform:translate(-50%,-100%);z-index:5;display:flex;flex-direction:column;align-items:center}
+.pin .head{width:38px;height:38px;border-radius:50% 50% 50% 0;transform:rotate(45deg);
+  display:grid;place-items:center;box-shadow:var(--sh-2);border:2.5px solid #fff}
+.pin .head svg{transform:rotate(-45deg)}
+.pin.lost .head{background:var(--coral-500);color:#fff}
+.pin.found .head{background:var(--sprout-500);color:#fff}
+.pin.lastseen .head{background:var(--sun-400);color:var(--bark-900)}
+.pin .pulse{position:absolute;top:-6px;width:54px;height:54px;border-radius:50%;
+  background:var(--coral-500);opacity:.18;animation:pulse 2.4s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.5);opacity:.35}100%{transform:scale(1.4);opacity:0}}
+/* paw path on map */
+.pawline{position:absolute;z-index:4;display:flex;gap:9px;align-items:center;transform:rotate(34deg);
+  transform-origin:left center}
+.pawline svg{width:13px;height:13px;color:var(--coral-300)}
+.map-search{position:absolute;top:14px;left:16px;right:16px;z-index:10;display:flex;align-items:center;gap:10px;
+  background:var(--surface);border-radius:var(--r-pill);padding:12px 16px;box-shadow:var(--sh-2);
+  font-weight:700;font-size:14px;color:var(--bark-700)}
+.map-fab{position:absolute;right:16px;bottom:230px;z-index:10;width:46px;height:46px;border-radius:14px;
+  background:var(--surface);box-shadow:var(--sh-2);display:grid;place-items:center;color:var(--sprout-600)}
+/* bottom sheet */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:24px 24px 0 0;
+  box-shadow:0 -8px 28px rgba(42,39,31,.14);padding:10px 20px 24px;z-index:20}
+.sheet .grip{width:40px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 14px}
+.sheet .sheet-card{display:flex;gap:13px;align-items:center}
+.sheet .thumb{width:64px;height:64px;border-radius:var(--r-md);flex-shrink:0;
+  background:linear-gradient(135deg,var(--sun-400),var(--coral-300))}
+.sheet h4{font-family:'Fredoka';font-weight:600;font-size:18px}
+.sheet .coords{font-family:'JetBrains Mono';font-size:11px;color:var(--bark-500);margin-top:3px}
+.sheet .actions{display:flex;gap:10px;margin-top:14px}
+.btn{flex:1;text-align:center;font-weight:800;font-size:14px;padding:13px;border-radius:var(--r-pill);border:0}
+.btn-p{background:var(--sprout-500);color:#fff}
+.btn-s{background:var(--surface);color:var(--sprout-700);border:1.5px solid var(--sprout-300)}
+
+/* ===== REPORT screen ===== */
+.r-head{padding:6px 20px 10px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.r-head .back{width:38px;height:38px;border-radius:50%;background:var(--surface);border:1px solid var(--border);
+  display:grid;place-items:center;color:var(--bark-700)}
+.r-head h2{font-family:'Fredoka';font-weight:600;font-size:20px}
+/* progress paw path */
+.rprog{display:flex;align-items:center;gap:6px;padding:0 20px 14px;flex-shrink:0}
+.rprog .seg{flex:1;height:5px;border-radius:3px;background:var(--border)}
+.rprog .seg.on{background:var(--sprout-500)}
+.rprog .lbl{font-size:11px;font-weight:800;color:var(--sprout-600)}
+.photo-up{height:140px;border-radius:var(--r-lg);border:2px dashed var(--sprout-300);background:var(--sprout-50);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:var(--sprout-700);
+  font-weight:800;font-size:14px;margin-bottom:18px}
+.photo-up .pic{width:46px;height:46px;border-radius:50%;background:var(--sprout-100);display:grid;place-items:center}
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:800;font-size:13px;margin-bottom:7px;color:var(--bark-700)}
+.field .input{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-md);
+  padding:13px 15px;font-size:15px;font-weight:600}
+.field .input.filled{border-color:var(--sprout-400);color:var(--bark-900)}
+.field .input.ph{color:var(--bark-300)}
+.field .input.area{height:74px}
+.specieschips{display:flex;gap:8px;flex-wrap:wrap}
+.r-cta{position:absolute;bottom:0;left:0;right:0;padding:16px 20px 26px;background:linear-gradient(0deg,var(--cream) 70%,transparent);
+  z-index:20}
+.r-cta button{width:100%;background:var(--coral-500);color:#fff;border:0;padding:16px;border-radius:var(--r-pill);
+  font-weight:800;font-size:16px;box-shadow:0 8px 20px rgba(242,96,60,.35);display:flex;align-items:center;
+  justify-content:center;gap:8px}
+
+@media(max-width:760px){body{padding:32px 12px}.phone{transform:scale(.92)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <span class="kick"><span>🐾</span> PawTrace · Screen Mockups</span>
+  <h1>Three core screens, on the tokens</h1>
+  <p>Home feed · Map · Report Lost Pet — every color, radius and type role pulled from the design system.</p>
+</div>
+
+<div class="stage">
+
+  <!-- ===================== SCREEN 1: HOME FEED ===================== -->
+  <div class="device-col">
+    <div class="device-label"><span class="n">1</span> Home feed</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="icons">📶 &nbsp;🔋</span></div>
+      <div class="appbar">
+        <div class="row">
+          <div><div class="hello">Good evening,</div><h2>Near you 🐾</h2></div>
+          <div class="avatar"></div>
+        </div>
+      </div>
+      <div class="body">
+        <div class="search">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
+          Search by name, breed or area
+        </div>
+        <div class="chips">
+          <span class="chip on">All</span>
+          <span class="chip">🐕 Dogs</span>
+          <span class="chip">🐈 Cats</span>
+          <span class="chip">📍 5 km</span>
+          <span class="chip">🕐 Today</span>
+        </div>
+        <div class="alert">
+          <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span>
+          <div><h4>A lost dog was reported nearby</h4><p>Buddy went missing 1.2 km away · 2h ago. Keep an eye out.</p></div>
+        </div>
+        <div class="sec-l"><h3>Recent reports</h3><a>See all</a></div>
+
+        <div class="petcard">
+          <div class="thumb" style="background:linear-gradient(135deg,var(--sun-400),var(--coral-300))"></div>
+          <div class="info">
+            <div class="top"><div><h4>Buddy</h4><div class="breed">Golden Retriever · 3 yrs</div></div>
+              <span class="badge b-lost"><span class="d"></span>LOST</span></div>
+            <div class="meta">📍 1.2 km · last seen 2h ago</div>
+          </div>
+        </div>
+
+        <div class="petcard">
+          <div class="thumb" style="background:linear-gradient(135deg,var(--sprout-300),var(--lagoon-300))"></div>
+          <div class="info">
+            <div class="top"><div><h4>Unknown tabby</h4><div class="breed">Cat · no collar</div></div>
+              <span class="badge b-found"><span class="d"></span>FOUND</span></div>
+            <div class="meta">📍 0.6 km · spotted today</div>
+          </div>
+        </div>
+
+        <div class="petcard">
+          <div class="thumb" style="background:linear-gradient(135deg,var(--sun-200),var(--sprout-300))"></div>
+          <div class="info">
+            <div class="top"><div><h4>Rosie</h4><div class="breed">Indie · 2 yrs</div></div>
+              <span class="badge b-search"><span class="d"></span>SEARCHING</span></div>
+            <div class="meta">📍 2.4 km · 3 sightings</div>
+          </div>
+        </div>
+
+        <div class="petcard">
+          <div class="thumb" style="background:linear-gradient(135deg,var(--lagoon-300),var(--sprout-200))"></div>
+          <div class="info">
+            <div class="top"><div><h4>Mochi</h4><div class="breed">Beagle · home safe 🎉</div></div>
+              <span class="badge b-reunited"><span class="d"></span>REUNITED</span></div>
+            <div class="meta">💚 Reunited after 3 days</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fab"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+      <div class="bnav">
+        <div class="nav-i on"><svg class="dot-i" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</div>
+        <div class="nav-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Map</div>
+        <div class="nav-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Search</div>
+        <div class="nav-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>Profile</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===================== SCREEN 2: MAP ===================== -->
+  <div class="device-col">
+    <div class="device-label"><span class="n">2</span> Map</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar" style="position:absolute;z-index:30;left:0;right:0;color:var(--bark-900)"><span>9:41</span><span class="icons">📶 &nbsp;🔋</span></div>
+      <div class="map">
+        <div class="road h" style="top:160px"></div>
+        <div class="road h" style="top:430px"></div>
+        <div class="road v" style="left:90px"></div>
+        <div class="road v" style="left:230px"></div>
+        <div class="park" style="left:120px;top:200px;width:130px;height:90px"></div>
+        <div class="park" style="left:20px;top:300px;width:70px;height:110px"></div>
+
+        <!-- paw path connecting last-seen to spotted -->
+        <div class="pawline" style="left:108px;top:250px">
+          <svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="6" ry="5"/><circle cx="5" cy="9" r="2.4"/><circle cx="19" cy="9" r="2.4"/><circle cx="9" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="6" ry="5"/><circle cx="5" cy="9" r="2.4"/><circle cx="19" cy="9" r="2.4"/><circle cx="9" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="6" ry="5"/><circle cx="5" cy="9" r="2.4"/><circle cx="19" cy="9" r="2.4"/><circle cx="9" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="6" ry="5"/><circle cx="5" cy="9" r="2.4"/><circle cx="19" cy="9" r="2.4"/><circle cx="9" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/></svg>
+        </div>
+
+        <!-- last seen (yellow) -->
+        <div class="pin lastseen" style="left:108px;top:255px">
+          <div class="head"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></div>
+        </div>
+        <!-- lost (coral, pulsing) -->
+        <div class="pin lost" style="left:200px;top:170px">
+          <div class="pulse"></div>
+          <div class="head"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="15" rx="5" ry="4"/><circle cx="6" cy="9" r="2"/><circle cx="18" cy="9" r="2"/><circle cx="9" cy="5.5" r="1.8"/><circle cx="15" cy="5.5" r="1.8"/></svg></div>
+        </div>
+        <!-- found (green) -->
+        <div class="pin found" style="left:265px;top:360px">
+          <div class="head"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+        </div>
+
+        <div class="map-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
+          Indiranagar, Bengaluru
+        </div>
+        <div class="map-fab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="5"/></svg></div>
+
+        <!-- bottom sheet -->
+        <div class="sheet">
+          <div class="grip"></div>
+          <div style="display:flex;gap:7px;margin-bottom:11px">
+            <span class="badge b-lost"><span class="d"></span>LOST</span>
+            <span class="badge b-search"><span class="d"></span>2 SIGHTINGS</span>
+          </div>
+          <div class="sheet-card">
+            <div class="thumb"></div>
+            <div style="flex:1">
+              <h4>Buddy</h4>
+              <div style="font-size:12px;color:var(--bark-500);font-weight:600">Golden Retriever · last seen 2h ago</div>
+              <div class="coords">12.9716° N, 77.5946° E</div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-s">Directions</button>
+            <button class="btn btn-p">I've seen Buddy</button>
+          </div>
+        </div>
+      </div>
+      <div class="bnav">
+        <div class="nav-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</div>
+        <div class="nav-i on"><svg class="dot-i" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Map</div>
+        <div class="nav-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Search</div>
+        <div class="nav-i"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>Profile</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===================== SCREEN 3: REPORT LOST PET ===================== -->
+  <div class="device-col">
+    <div class="device-label"><span class="n">3</span> Report lost pet</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="icons">📶 &nbsp;🔋</span></div>
+      <div class="r-head">
+        <div class="back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
+        <h2>Report a lost pet</h2>
+      </div>
+      <div class="rprog">
+        <div class="seg on"></div><div class="seg on"></div><div class="seg"></div>
+        <span class="lbl">Step 2 of 3</span>
+      </div>
+      <div class="body" style="padding-bottom:110px">
+        <div class="photo-up">
+          <div class="pic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
+          Add a clear photo
+          <span style="font-size:11px;font-weight:700;color:var(--bark-500)">Helps neighbors recognise them</span>
+        </div>
+
+        <div class="field">
+          <label>Pet's name</label>
+          <div class="input filled">Buddy</div>
+        </div>
+
+        <div class="field">
+          <label>Species</label>
+          <div class="specieschips">
+            <span class="chip on">🐕 Dog</span>
+            <span class="chip">🐈 Cat</span>
+            <span class="chip">🐇 Other</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Last seen location</label>
+          <div class="input filled" style="display:flex;align-items:center;gap:8px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--coral-500)" stroke-width="2.4"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            100 Ft Road, Indiranagar
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <div class="input area ph">Friendly, shy around traffic. Red collar, answers to Buddy…</div>
+        </div>
+      </div>
+
+      <div class="r-cta">
+        <button>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+          Report Buddy as lost
+        </button>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',function(){
+  if(this.closest('.specieschips')){this.closest('.specieschips').querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));this.classList.add('on');}
+  else this.classList.toggle('on');
+}));
+</script>
+</body>
+</html>

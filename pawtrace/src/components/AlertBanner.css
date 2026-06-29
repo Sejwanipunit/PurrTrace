@@ -1,0 +1,33 @@
+.alert-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-md);
+  background: var(--coral-50);
+  border: 1px solid var(--coral-100);
+  border-left: 4px solid var(--coral-500);
+  border-radius: var(--r-md);
+  padding: var(--s-md);
+}
+
+.alert-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--coral-500);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-title {
+  color: var(--coral-700);
+  font-size: 16px;
+}
+
+.alert-message {
+  color: var(--coral-700);
+  opacity: 0.85;
+  margin-top: 2px;
+}

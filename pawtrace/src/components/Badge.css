@@ -1,0 +1,44 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-lost {
+  background: var(--coral-50);
+  color: var(--coral-700);
+}
+.badge-lost .badge-dot { background: var(--coral-500); }
+
+.badge-found {
+  background: var(--sprout-50);
+  color: var(--sprout-700);
+}
+.badge-found .badge-dot { background: var(--sprout-500); }
+
+.badge-searching {
+  background: var(--sun-100);
+  color: var(--sun-700);
+}
+.badge-searching .badge-dot { background: var(--sun-400); }
+
+.badge-reunited {
+  background: var(--lagoon-50);
+  color: var(--lagoon-700);
+}
+.badge-reunited .badge-dot { background: var(--lagoon-500); }

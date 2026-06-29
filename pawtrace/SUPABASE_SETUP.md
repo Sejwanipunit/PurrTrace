@@ -1,0 +1,85 @@
+# PawTrace — going live with Supabase + Google sign-in
+
+PawTrace runs in **demo mode** out of the box (in-memory mock data, auto signed-in as a
+demo user) so you can develop without a backend. To turn it into a **real multi-user app**
+with Google login, a Postgres database, and photo storage, do the four steps below.
+
+It takes ~10 minutes and uses only free tiers.
+
+---
+
+## 1. Create a Supabase project
+
+1. Go to <https://supabase.com> → **Start your project** → sign in.
+2. **New project** → pick a name (e.g. `pawtrace`), a database password, and a region near you.
+3. Wait ~2 min for it to provision.
+
+## 2. Create the database schema
+
+1. In the project, open **SQL Editor** → **New query**.
+2. Open `supabase/schema.sql` from this repo, copy its entire contents, paste, and click **Run**.
+   - This creates the `profiles`, `pets`, and `sightings` tables, row-level-security policies,
+     the `pet-photos` storage bucket, the signup trigger, and a few demo pets.
+   - It's safe to re-run.
+
+## 3. Enable Google sign-in
+
+You need Google OAuth credentials, then paste them into Supabase.
+
+**In Google Cloud Console** (<https://console.cloud.google.com>):
+1. Create (or pick) a project → **APIs & Services → OAuth consent screen** → configure
+   (External, add your email as a test user).
+2. **APIs & Services → Credentials → Create credentials → OAuth client ID → Web application**.
+3. Under **Authorized redirect URIs**, add the callback URL from Supabase:
+   - In Supabase: **Authentication → Providers → Google** — copy the **Callback URL** shown there
+     (looks like `https://<your-ref>.supabase.co/auth/v1/callback`).
+4. Copy the generated **Client ID** and **Client secret**.
+
+**In Supabase:**
+1. **Authentication → Providers → Google** → toggle **Enable**.
+2. Paste the **Client ID** and **Client secret** → **Save**.
+3. **Authentication → URL Configuration** → set **Site URL** to your app URL
+   (`http://localhost:5173` for local dev; your real domain in production) and add it to
+   **Redirect URLs**.
+
+## 4. Point the app at your project
+
+1. In **Supabase → Project Settings → API**, copy the **Project URL** and the **anon / public** key.
+2. In this repo, copy `.env.example` to `.env` and fill them in:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   ```env
+   VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-public-key
+   ```
+
+3. Restart the dev server (`npm run dev`). The app now shows the **Login** screen and requires
+   Google sign-in. Reports, sightings, photos, and reunited counts persist in Supabase.
+
+---
+
+## How it works
+
+- **`src/lib/supabase.ts`** — creates the client and exposes `isSupabaseConfigured`. When the env
+  vars are absent, the whole app transparently falls back to the mock data layer.
+- **`src/context/AuthContext.tsx`** — Google OAuth, session handling, and loading the user's profile.
+- **`src/data/petsService.ts`** — every function (`listPets`, `getPet`, `addPet`, `addSighting`,
+  `markReunited`, `uploadPhoto`) talks to Supabase when configured, mock data otherwise. The screens
+  never changed — they call the same service.
+- **Security** — Row Level Security makes reads public (it's a community board) but restricts writes
+  to authenticated users, and edits/deletes to the owner of each report.
+
+## Deploying
+
+Any static host works (Vercel, Netlify, Cloudflare Pages):
+
+```bash
+npm run build      # outputs dist/
+```
+
+Set the two `VITE_SUPABASE_*` env vars in your host's dashboard, and add your production domain to
+Supabase **Authentication → URL Configuration** (Site URL + Redirect URLs) and to the Google OAuth
+**Authorized redirect URIs**.

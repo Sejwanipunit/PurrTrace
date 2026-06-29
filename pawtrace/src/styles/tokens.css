@@ -1,0 +1,93 @@
+:root {
+  /* Sprout — primary / brand (green) */
+  --sprout-50: #EFF9E6;
+  --sprout-100: #D9F1C2;
+  --sprout-200: #BFE899;
+  --sprout-300: #A2DC6E;
+  --sprout-400: #88CF4C;
+  --sprout-500: #6FB833;
+  --sprout-600: #579522;
+  --sprout-700: #43741B;
+  --sprout-800: #325616;
+  --sprout-900: #213A10;
+  /* Sunbeam — secondary / highlight (yellow) */
+  --sun-50: #FEFBE6;
+  --sun-100: #FCF5B9;
+  --sun-200: #FAEC86;
+  --sun-300: #F7E153;
+  --sun-400: #F5D827;
+  --sun-500: #ECC50E;
+  --sun-600: #C29D0A;
+  --sun-700: #8C7107;
+  /* Lagoon — accent / trust / info (teal) */
+  --lagoon-50: #E7F5F2;
+  --lagoon-100: #C2E7E0;
+  --lagoon-300: #6BC6B8;
+  --lagoon-500: #3EA094;
+  --lagoon-700: #2A736A;
+  --lagoon-900: #19443F;
+  /* Coral — Lost / urgent / error */
+  --coral-50: #FDEEE9;
+  --coral-100: #FBD3C6;
+  --coral-300: #F59478;
+  --coral-500: #F2603C;
+  --coral-700: #C2421F;
+  /* Warm neutrals */
+  --cream: #FBFAF5;
+  --surface: #FFFFFF;
+  --sand: #F3F0E7;
+  --border: #E6E1D5;
+  --bark-900: #2A271F;
+  --bark-700: #4A463B;
+  --bark-500: #6E6857;
+  --bark-300: #A9A28E;
+  /* Functional */
+  --error: #E5453A;
+  --warning: #F0A020;
+  --info: #3EA094;
+  --success: #2EA84F;
+  /* Radius */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+  /* Spacing (4px grid) */
+  --s-xs: 4px;
+  --s-sm: 8px;
+  --s-md: 16px;
+  --s-lg: 24px;
+  --s-xl: 32px;
+  --s-2xl: 48px;
+  --s-3xl: 64px;
+  /* Shadows (warm, soft) */
+  --sh-1: 0 1px 3px rgba(42, 39, 31, 0.06);
+  --sh-2: 0 4px 12px rgba(42, 39, 31, 0.08);
+  --sh-3: 0 12px 28px rgba(42, 39, 31, 0.12);
+}
+
+[data-theme="dark"] {
+  --cream: #1C1A14;
+  --surface: #26241C;
+  --sand: #2E2C22;
+  --border: #3A3829;
+  --bark-900: #ECE8DD;
+  --bark-700: #D4CFBF;
+  --bark-500: #B5AF9E;
+  --bark-300: #7A7567;
+  --sprout-500: #88CF4C;
+  --sprout-600: #6FB833;
+  --sprout-400: #A2DC6E;
+  --coral-500: #F59478;
+  --coral-300: #F59478;
+  --coral-50: #3A1F18;
+  --coral-100: #4A2720;
+  --sprout-50: #1A2612;
+  --sprout-100: #243519;
+  --lagoon-50: #0F2423;
+  --sun-100: #2E2800;
+  --sh-1: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --sh-2: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --sh-3: 0 12px 28px rgba(0, 0, 0, 0.4);
+}

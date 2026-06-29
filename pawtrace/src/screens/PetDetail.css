@@ -1,0 +1,227 @@
+.pet-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-hero {
+  position: relative;
+  height: 260px;
+  flex-shrink: 0;
+}
+
+.detail-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-hero-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.back-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sh-2);
+  color: var(--bark-900);
+  transition: transform 0.15s;
+}
+.back-btn:hover { transform: scale(1.05); }
+
+.detail-back {
+  position: absolute;
+  top: calc(var(--s-md) + env(safe-area-inset-top, 0px));
+  left: var(--s-md);
+  z-index: 2;
+}
+
+.detail-hero-badge {
+  position: absolute;
+  top: calc(var(--s-md) + env(safe-area-inset-top, 0px));
+  right: var(--s-md);
+}
+
+.detail-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-lg);
+  padding: var(--s-lg) var(--s-md);
+}
+
+.detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-md);
+}
+.detail-title-row .btn {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  min-height: 40px;
+  font-size: 12px;
+}
+
+.section-label {
+  margin-bottom: var(--s-sm);
+  color: var(--bark-900);
+}
+
+.detail-desc {
+  color: var(--bark-700);
+  line-height: 1.65;
+}
+
+.detail-meta-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-md);
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: var(--s-sm);
+  border-bottom: 1px solid var(--border);
+}
+.meta-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.detail-map-wrap {
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.detail-coords {
+  padding: var(--s-sm) var(--s-md);
+  background: var(--sand);
+  color: var(--bark-500);
+}
+
+.sightings-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-md);
+}
+
+.sighting-item {
+  display: flex;
+  gap: var(--s-md);
+  align-items: flex-start;
+}
+
+.sighting-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sprout-500);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.contact-reveal {
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+  color: var(--sprout-600);
+  font-weight: 700;
+  font-size: 14px;
+  background: var(--sprout-50);
+  border: 1.5px dashed var(--sprout-300);
+  border-radius: var(--r-md);
+  padding: var(--s-md);
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.contact-reveal:hover { background: var(--sprout-100); }
+
+.contact-revealed {
+  background: var(--sprout-50);
+  border: 1.5px solid var(--sprout-200);
+  border-radius: var(--r-md);
+  padding: var(--s-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-number {
+  color: var(--sprout-700);
+  font-family: 'Fredoka', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.detail-ctas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-sm);
+}
+
+.sighting-link {
+  color: var(--sprout-600);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 8px;
+}
+
+.detail-loading {
+  display: flex;
+  flex-direction: column;
+}
+.detail-hero-skeleton {
+  height: 260px;
+  background: linear-gradient(90deg, var(--sand) 25%, var(--border) 50%, var(--sand) 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.5s infinite;
+}
+.skeleton-text {
+  height: 18px;
+  background: var(--sand);
+  border-radius: var(--r-xs);
+  width: 100%;
+}
+
+.detail-error {
+  display: flex;
+  flex-direction: column;
+}
+
+.reunited-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--s-md);
+  background: var(--lagoon-50);
+  border: 1px solid var(--lagoon-100);
+  border-radius: var(--r-lg);
+  padding: var(--s-lg);
+}
+
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-hero-skeleton, .skeleton-text { animation: none; }
+}

@@ -1,0 +1,14 @@
+# OS
+.DS_Store
+
+# Local tooling
+.claude/
+
+# Node / build (also covered by pawtrace/.gitignore for the app subtree)
+node_modules/
+dist/
+*.log
+
+# Env / secrets — never commit these
+.env
+.env.local

@@ -1,0 +1,112 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--cream);
+  color: var(--bark-900);
+  font-family: 'Nunito Sans', sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fredoka', sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: 'Nunito Sans', sans-serif;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+input, textarea, select {
+  font-family: 'Nunito Sans', sans-serif;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 3px solid var(--sprout-500);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* App shell */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app-column {
+  max-width: 440px;
+  width: 100%;
+  margin-inline: auto;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+}
+
+.screen-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: calc(72px + max(20px, env(safe-area-inset-bottom)));
+}
+
+/* Type scale helpers */
+.t-display { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 40px; line-height: 48px; letter-spacing: -0.5px; }
+.t-headline { font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 28px; line-height: 36px; }
+.t-title { font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 20px; line-height: 28px; }
+.t-body-l { font-family: 'Nunito Sans', sans-serif; font-weight: 400; font-size: 16px; line-height: 24px; }
+.t-body-m { font-family: 'Nunito Sans', sans-serif; font-weight: 400; font-size: 14px; line-height: 20px; }
+.t-body-s { font-family: 'Nunito Sans', sans-serif; font-weight: 400; font-size: 13px; line-height: 18px; }
+.t-label { font-family: 'Nunito Sans', sans-serif; font-weight: 800; font-size: 14px; line-height: 20px; letter-spacing: 0.4px; }
+.t-mono { font-family: 'JetBrains Mono', monospace; font-weight: 500; font-size: 12px; }
+
+/* Splash loader */
+.splash-paw {
+  animation: splash-pulse 1.4s ease-in-out infinite;
+}
+@keyframes splash-pulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.05); opacity: 1; }
+}

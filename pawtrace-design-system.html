@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawTrace — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* ---- Sprout (primary green) ---- */
+  --sprout-50:#EFF9E6; --sprout-100:#D9F1C2; --sprout-200:#BFE899; --sprout-300:#A2DC6E;
+  --sprout-400:#88CF4C; --sprout-500:#6FB833; --sprout-600:#579522; --sprout-700:#43741B;
+  --sprout-800:#325616; --sprout-900:#213A10;
+  /* ---- Sunbeam (yellow highlight) ---- */
+  --sun-50:#FEFBE6; --sun-100:#FCF5B9; --sun-200:#FAEC86; --sun-300:#F7E153;
+  --sun-400:#F5D827; --sun-500:#ECC50E; --sun-600:#C29D0A; --sun-700:#8C7107;
+  /* ---- Lagoon (teal accent) ---- */
+  --lagoon-50:#E7F5F2; --lagoon-100:#C2E7E0; --lagoon-300:#6BC6B8; --lagoon-500:#3EA094;
+  --lagoon-700:#2A736A; --lagoon-900:#19443F;
+  /* ---- Coral (Lost / urgent) ---- */
+  --coral-50:#FDEEE9; --coral-100:#FBD3C6; --coral-300:#F59478; --coral-500:#F2603C;
+  --coral-700:#C2421F;
+  /* ---- Warm neutrals ---- */
+  --cream:#FBFAF5; --surface:#FFFFFF; --sand:#F3F0E7; --border:#E6E1D5;
+  --bark-900:#2A271F; --bark-700:#4A463B; --bark-500:#6E6857; --bark-300:#A9A28E;
+  /* functional */
+  --error:#E5453A; --warning:#F0A020; --info:#3EA094; --success:#2EA84F;
+  /* radius */
+  --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:20px; --r-xl:28px; --r-pill:999px;
+  /* shadow (warm, soft) */
+  --sh-1:0 1px 2px rgba(42,39,31,.06), 0 1px 3px rgba(42,39,31,.05);
+  --sh-2:0 4px 10px rgba(42,39,31,.07), 0 2px 4px rgba(42,39,31,.05);
+  --sh-3:0 12px 28px rgba(42,39,31,.10), 0 6px 10px rgba(42,39,31,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Nunito Sans',system-ui,sans-serif;
+  background:var(--cream); color:var(--bark-900);
+  line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+h1,h2,h3,h4,.disp{font-family:'Fredoka',sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* paw-path signature divider */
+.pawpath{display:flex;align-items:center;gap:14px;justify-content:center;margin:8px 0 36px;opacity:.7}
+.pawpath .paw{width:14px;height:14px;color:var(--sprout-400);transform:rotate(var(--rot,0deg))}
+.pawpath .paw:nth-child(odd){color:var(--lagoon-300)}
+
+/* ---------- hero ---------- */
+header.hero{
+  background:
+    radial-gradient(120% 90% at 85% -10%, var(--sun-200) 0%, transparent 55%),
+    radial-gradient(120% 90% at -10% 110%, var(--lagoon-100) 0%, transparent 50%),
+    var(--sprout-50);
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+.hero .wrap{padding-top:56px;padding-bottom:56px;position:relative}
+.kicker{display:inline-flex;align-items:center;gap:8px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--r-pill);padding:7px 14px;
+  font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--sprout-700);
+  box-shadow:var(--sh-1)}
+.kicker .dot{width:9px;height:9px;border-radius:50%;background:var(--sprout-500)}
+.hero h1{font-size:clamp(40px,7vw,68px);font-weight:600;line-height:1.02;letter-spacing:-.02em;margin:22px 0 14px}
+.hero h1 .ink{color:var(--sprout-600)}
+.hero p{font-size:19px;max-width:560px;color:var(--bark-700)}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.tag{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);
+  padding:8px 14px;font-size:13px;font-weight:700;color:var(--bark-700)}
+
+/* ---------- sections ---------- */
+section{padding:64px 0}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+.sec-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--sprout-600);font-weight:500;
+  border:1px solid var(--sprout-200);background:var(--sprout-50);padding:3px 8px;border-radius:var(--r-xs)}
+.sec-head h2{font-size:34px;font-weight:600;letter-spacing:-.01em}
+.sec-sub{color:var(--bark-500);font-size:16px;max-width:620px;margin-bottom:34px}
+
+/* swatches */
+.ramp{display:grid;grid-template-columns:repeat(10,1fr);border-radius:var(--r-md);overflow:hidden;
+  box-shadow:var(--sh-1);margin-bottom:14px;border:1px solid var(--border)}
+.ramp.short{grid-template-columns:repeat(6,1fr)}
+.ramp.tiny{grid-template-columns:repeat(5,1fr)}
+.swatch{aspect-ratio:1/1.15;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:10px;font-size:11px;font-weight:700}
+.swatch .hex{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:10px;opacity:.85}
+.ramp-name{font-weight:800;font-size:15px;margin:18px 0 6px;display:flex;align-items:center;gap:10px}
+.ramp-name small{font-weight:600;color:var(--bark-500);font-family:'JetBrains Mono',monospace;font-size:12px}
+.role{color:var(--bark-500);font-size:13px;margin-bottom:8px}
+
+/* cards grid */
+.grid{display:grid;gap:20px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  box-shadow:var(--sh-1);overflow:hidden}
+.card-pad{padding:22px}
+
+/* type specimens */
+.spec{border-bottom:1px dashed var(--border);padding:18px 0;display:flex;
+  align-items:baseline;justify-content:space-between;gap:20px}
+.spec:last-child{border-bottom:0}
+.spec .meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--bark-500);
+  white-space:nowrap;text-align:right}
+.d-l{font-family:'Fredoka';font-weight:600;font-size:40px;line-height:1.1;letter-spacing:-.02em}
+.h-l{font-family:'Fredoka';font-weight:500;font-size:28px;line-height:1.2}
+.t-l{font-family:'Fredoka';font-weight:500;font-size:20px}
+.b-l{font-size:16px}
+.lbl{font-weight:800;font-size:14px;letter-spacing:.04em}
+
+/* status badges */
+.badges{display:flex;flex-wrap:wrap;gap:12px}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:var(--r-pill);
+  font-weight:800;font-size:13px;letter-spacing:.02em}
+.badge .b-dot{width:8px;height:8px;border-radius:50%}
+.b-lost{background:var(--coral-50);color:var(--coral-700)}.b-lost .b-dot{background:var(--coral-500)}
+.b-found{background:var(--sprout-50);color:var(--sprout-700)}.b-found .b-dot{background:var(--sprout-500)}
+.b-reunited{background:var(--lagoon-50);color:var(--lagoon-700)}.b-reunited .b-dot{background:var(--lagoon-500)}
+.b-search{background:var(--sun-100);color:var(--sun-700)}.b-search .b-dot{background:var(--sun-500)}
+
+/* buttons */
+.btns{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn{font-family:'Nunito Sans';font-weight:800;font-size:15px;border:0;cursor:pointer;
+  padding:13px 24px;border-radius:var(--r-pill);display:inline-flex;align-items:center;gap:9px;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .15s,background .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn-primary{background:var(--sprout-500);color:#fff;box-shadow:var(--sh-2)}
+.btn-primary:hover{background:var(--sprout-600)}
+.btn-report{background:var(--coral-500);color:#fff;box-shadow:0 6px 16px rgba(242,96,60,.35)}
+.btn-report:hover{background:var(--coral-700)}
+.btn-secondary{background:var(--surface);color:var(--sprout-700);border:1.5px solid var(--sprout-300)}
+.btn-secondary:hover{background:var(--sprout-50)}
+.btn-tertiary{background:transparent;color:var(--bark-700);padding-left:10px;padding-right:10px}
+.btn-tertiary:hover{background:var(--sand)}
+.fab{width:60px;height:60px;border-radius:var(--r-xl);background:var(--sprout-500);color:#fff;
+  display:inline-grid;place-items:center;box-shadow:var(--sh-3);border:0;cursor:pointer;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.fab:hover{transform:rotate(8deg) scale(1.06)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:9px 16px;border-radius:var(--r-pill);font-weight:700;font-size:14px;
+  border:1.5px solid var(--border);background:var(--surface);color:var(--bark-700);cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;transition:.15s}
+.chip.on{background:var(--sprout-500);color:#fff;border-color:var(--sprout-500)}
+.chip:not(.on):hover{border-color:var(--sprout-300);background:var(--sprout-50)}
+
+/* input */
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:800;font-size:13px;margin-bottom:7px;color:var(--bark-700)}
+.field input{width:100%;font-family:'Nunito Sans';font-size:16px;padding:14px 16px;
+  border:1.5px solid var(--border);border-radius:var(--r-md);background:var(--surface);color:var(--bark-900);
+  transition:.15s}
+.field input:focus{outline:0;border-color:var(--sprout-500);box-shadow:0 0 0 4px var(--sprout-100)}
+.field input::placeholder{color:var(--bark-300)}
+
+/* pet card demo */
+.pet{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  overflow:hidden;box-shadow:var(--sh-2)}
+.pet .photo{height:170px;position:relative;
+  background:linear-gradient(135deg,var(--sprout-200),var(--lagoon-100))}
+.pet .photo .badge{position:absolute;top:12px;left:12px;box-shadow:var(--sh-1)}
+.pet .photo .heart{position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;
+  background:rgba(255,255,255,.9);display:grid;place-items:center;color:var(--coral-500)}
+.pet .pet-body{padding:18px}
+.pet h4{font-family:'Fredoka';font-weight:600;font-size:21px}
+.pet .breed{color:var(--bark-500);font-size:14px;margin-bottom:12px}
+.pet .meta-row{display:flex;align-items:center;gap:8px;color:var(--bark-700);font-size:14px;font-weight:600}
+.pet .coords{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--bark-500);margin-top:10px}
+
+/* journey tracker (signature) */
+.journey{display:flex;align-items:flex-start;justify-content:space-between;position:relative;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:26px 22px;box-shadow:var(--sh-1)}
+.journey .line{position:absolute;top:42px;left:12%;right:12%;height:0;
+  border-top:3px dashed var(--sprout-300);z-index:0}
+.step{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:9px;
+  text-align:center;width:33%}
+.step .node{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--surface);border:3px solid var(--sprout-300);color:var(--sprout-600)}
+.step.done .node{background:var(--sprout-500);border-color:var(--sprout-500);color:#fff}
+.step.now .node{background:var(--sun-400);border-color:var(--sun-500);color:var(--bark-900)}
+.step .s-label{font-weight:800;font-size:13px}
+.step .s-sub{font-size:11px;color:var(--bark-500)}
+
+/* alert banner */
+.alert{display:flex;gap:14px;align-items:flex-start;background:var(--coral-50);
+  border:1px solid var(--coral-100);border-left:4px solid var(--coral-500);
+  border-radius:var(--r-md);padding:16px 18px}
+.alert .ic{width:34px;height:34px;border-radius:50%;background:var(--coral-500);color:#fff;
+  display:grid;place-items:center;flex-shrink:0}
+.alert h4{font-family:'Fredoka';font-weight:600;font-size:16px;color:var(--coral-700)}
+.alert p{font-size:14px;color:var(--bark-700)}
+
+/* spacing/radius scale viz */
+.scale-row{display:flex;align-items:center;gap:16px;margin-bottom:10px}
+.scale-bar{height:20px;background:var(--sprout-300);border-radius:4px}
+.scale-row .mono{width:130px;color:var(--bark-500);font-size:13px}
+.radius-demo{display:flex;gap:18px;flex-wrap:wrap}
+.radius-demo div{width:78px;height:78px;background:var(--lagoon-100);border:1.5px solid var(--lagoon-300);
+  display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--lagoon-700)}
+
+/* nav demo */
+.bottomnav{display:flex;justify-content:space-around;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--r-xl);padding:12px 8px;box-shadow:var(--sh-2);max-width:420px}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--bark-500);
+  font-size:11px;font-weight:700;padding:6px 14px;border-radius:var(--r-md)}
+.nav-item.on{color:var(--sprout-600);background:var(--sprout-50)}
+
+/* code block */
+pre{background:#23211B;color:#EDEAE0;border-radius:var(--r-md);padding:22px;overflow-x:auto;
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.7;box-shadow:var(--sh-2)}
+pre .c{color:#8FB97A}.k{color:#E0B05A}.s{color:#D98E73}.n{color:#7FC8BC}.t{color:#C9A6E0}
+.code-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.code-tab{padding:8px 16px;border-radius:var(--r-pill);font-weight:700;font-size:13px;cursor:pointer;
+  border:1.5px solid var(--border);background:var(--surface);color:var(--bark-700)}
+.code-tab.on{background:var(--bark-900);color:var(--cream);border-color:var(--bark-900)}
+.code-panel{display:none}.code-panel.on{display:block}
+
+/* principles */
+.principle{display:flex;gap:16px;align-items:flex-start;margin-bottom:6px}
+.principle .pnum{font-family:'Fredoka';font-weight:600;font-size:22px;color:var(--sprout-400);
+  width:34px;flex-shrink:0}
+.principle h4{font-family:'Fredoka';font-weight:500;font-size:18px;margin-bottom:3px}
+.principle p{color:var(--bark-700);font-size:15px}
+
+footer{background:var(--bark-900);color:var(--cream);padding:48px 0;margin-top:40px}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+footer .disp{font-size:24px;font-weight:600}
+footer small{color:var(--bark-300);font-family:'JetBrains Mono',monospace;font-size:12px}
+
+@media(max-width:760px){
+  .g2,.g3{grid-template-columns:1fr}
+  .ramp{grid-template-columns:repeat(5,1fr)}
+  .ramp.short{grid-template-columns:repeat(3,1fr)}
+  .spec{flex-direction:column;gap:6px}.spec .meta{text-align:left}
+  .sec-head{flex-direction:column;gap:6px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker"><span class="dot"></span>PawTrace · Design System v1</span>
+    <h1>Every lost pet leaves<br>a <span class="ink">trail home.</span></h1>
+    <p>A warm, playful design language for reuniting pets with their people — hopeful in the happy moments, calm and clear in the anxious ones.</p>
+    <div class="hero-meta">
+      <span class="tag">🎨 Playful · Flat · Warm</span>
+      <span class="tag">📱 Built for Jetpack Compose</span>
+      <span class="tag">🐾 Paw-path signature</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="pawpath" style="margin-top:40px">
+    <!-- paw prints -->
+    <svg class="paw" style="--rot:-12deg" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="6" ry="5"/><circle cx="5" cy="9" r="2.4"/><circle cx="19" cy="9" r="2.4"/><circle cx="9" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/></svg>
+    <svg class="paw" style="--rot:6deg" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="6" ry="5"/><circle cx="5" cy="9" r="2.4"/><circle cx="19" cy="9" r="2.4"/><circle cx="9" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/></svg>
+    <svg class="paw" style="--rot:-8deg" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="6" ry="5"/><circle cx="5" cy="9" r="2.4"/><circle cx="19" cy="9" r="2.4"/><circle cx="9" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/></svg>
+    <svg class="paw" style="--rot:10deg" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="6" ry="5"/><circle cx="5" cy="9" r="2.4"/><circle cx="19" cy="9" r="2.4"/><circle cx="9" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/></svg>
+    <svg class="paw" style="--rot:-4deg" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="6" ry="5"/><circle cx="5" cy="9" r="2.4"/><circle cx="19" cy="9" r="2.4"/><circle cx="9" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/></svg>
+  </div>
+
+  <!-- ============ BRAND VOICE ============ -->
+  <section style="padding-top:8px">
+    <div class="sec-head"><span class="sec-num">00</span><h2>Brand personality</h2></div>
+    <p class="sec-sub">PawTrace borrows MindMarket's playful, human-centered warmth — but tunes it for emotional range. The same app must feel reassuring at 11pm when a dog is missing, and joyful the morning it comes home.</p>
+    <div class="grid g3">
+      <div class="card card-pad"><div class="principle"><h4>🤝 Warm, not clinical</h4><p>Rounded forms, soft cream surfaces, friendly copy. This is a neighbor helping, not a database.</p></div></div>
+      <div class="card card-pad"><div class="principle"><h4>🌱 Hopeful by default</h4><p>Green leads everything. Even a "Lost" listing frames the goal: getting home.</p></div></div>
+      <div class="card card-pad"><div class="principle"><h4>⚡ Clear under stress</h4><p>Coral and high contrast for urgent states. When it matters, the interface gets calm and direct.</p></div></div>
+    </div>
+  </section>
+
+  <!-- ============ COLOR ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>Color</h2></div>
+    <p class="sec-sub">Four brand families on warm neutrals. Sprout carries the brand and primary actions; Sunbeam highlights and draws the eye; Lagoon signals trust, info, and calm resolution; Coral is reserved for the Lost state and genuine urgency.</p>
+
+    <div class="ramp-name">Sprout <small>primary · brand</small></div>
+    <div class="role">Primary buttons, active states, the brand itself. Use 500 on white; 600/700 for text on light backgrounds.</div>
+    <div class="ramp">
+      <div class="swatch" style="background:var(--sprout-50);color:#43741B">50<span class="hex">#EFF9E6</span></div>
+      <div class="swatch" style="background:var(--sprout-100);color:#43741B">100<span class="hex">#D9F1C2</span></div>
+      <div class="swatch" style="background:var(--sprout-200);color:#43741B">200<span class="hex">#BFE899</span></div>
+      <div class="swatch" style="background:var(--sprout-300);color:#325616">300<span class="hex">#A2DC6E</span></div>
+      <div class="swatch" style="background:var(--sprout-400);color:#325616">400<span class="hex">#88CF4C</span></div>
+      <div class="swatch" style="background:var(--sprout-500);color:#fff">500<span class="hex">#6FB833</span></div>
+      <div class="swatch" style="background:var(--sprout-600);color:#fff">600<span class="hex">#579522</span></div>
+      <div class="swatch" style="background:var(--sprout-700);color:#fff">700<span class="hex">#43741B</span></div>
+      <div class="swatch" style="background:var(--sprout-800);color:#fff">800<span class="hex">#325616</span></div>
+      <div class="swatch" style="background:var(--sprout-900);color:#fff">900<span class="hex">#213A10</span></div>
+    </div>
+
+    <div class="ramp-name">Sunbeam <small>secondary · highlight</small></div>
+    <div class="role">Highlights, "Searching" status, optimism. Never for text — pair with bark-900 ink.</div>
+    <div class="ramp short">
+      <div class="swatch" style="background:var(--sun-50);color:#8C7107">50<span class="hex">#FEFBE6</span></div>
+      <div class="swatch" style="background:var(--sun-100);color:#8C7107">100<span class="hex">#FCF5B9</span></div>
+      <div class="swatch" style="background:var(--sun-200);color:#8C7107">200<span class="hex">#FAEC86</span></div>
+      <div class="swatch" style="background:var(--sun-400);color:#2A271F">400<span class="hex">#F5D827</span></div>
+      <div class="swatch" style="background:var(--sun-600);color:#fff">600<span class="hex">#C29D0A</span></div>
+      <div class="swatch" style="background:var(--sun-700);color:#fff">700<span class="hex">#8C7107</span></div>
+    </div>
+
+    <div class="ramp-name">Lagoon <small>accent · trust & info</small></div>
+    <div class="role">Links, info messages, the "Reunited" resolution. Calm counterweight to the warm colors.</div>
+    <div class="ramp short">
+      <div class="swatch" style="background:var(--lagoon-50);color:#2A736A">50<span class="hex">#E7F5F2</span></div>
+      <div class="swatch" style="background:var(--lagoon-100);color:#2A736A">100<span class="hex">#C2E7E0</span></div>
+      <div class="swatch" style="background:var(--lagoon-300);color:#19443F">300<span class="hex">#6BC6B8</span></div>
+      <div class="swatch" style="background:var(--lagoon-500);color:#fff">500<span class="hex">#3EA094</span></div>
+      <div class="swatch" style="background:var(--lagoon-700);color:#fff">700<span class="hex">#2A736A</span></div>
+      <div class="swatch" style="background:var(--lagoon-900);color:#fff">900<span class="hex">#19443F</span></div>
+    </div>
+
+    <div class="ramp-name">Coral <small>alert · the Lost state</small></div>
+    <div class="role">Reserved. The "Lost" badge, destructive actions, urgent alerts. Warm enough to avoid panic, clear enough to be unmissable.</div>
+    <div class="ramp tiny">
+      <div class="swatch" style="background:var(--coral-50);color:#C2421F">50<span class="hex">#FDEEE9</span></div>
+      <div class="swatch" style="background:var(--coral-100);color:#C2421F">100<span class="hex">#FBD3C6</span></div>
+      <div class="swatch" style="background:var(--coral-300);color:#fff">300<span class="hex">#F59478</span></div>
+      <div class="swatch" style="background:var(--coral-500);color:#fff">500<span class="hex">#F2603C</span></div>
+      <div class="swatch" style="background:var(--coral-700);color:#fff">700<span class="hex">#C2421F</span></div>
+    </div>
+
+    <div class="ramp-name">Warm neutrals <small>surfaces & ink</small></div>
+    <div class="role">Cream background instead of pure white; bark ink instead of pure black. Keeps everything friendly.</div>
+    <div class="ramp short">
+      <div class="swatch" style="background:var(--cream);color:#2A271F;border-right:1px solid var(--border)">Cream<span class="hex">#FBFAF5</span></div>
+      <div class="swatch" style="background:var(--sand);color:#2A271F">Sand<span class="hex">#F3F0E7</span></div>
+      <div class="swatch" style="background:var(--border);color:#2A271F">Border<span class="hex">#E6E1D5</span></div>
+      <div class="swatch" style="background:var(--bark-500);color:#fff">Bark500<span class="hex">#6E6857</span></div>
+      <div class="swatch" style="background:var(--bark-700);color:#fff">Bark700<span class="hex">#4A463B</span></div>
+      <div class="swatch" style="background:var(--bark-900);color:#fff">Bark900<span class="hex">#2A271F</span></div>
+    </div>
+  </section>
+
+  <!-- ============ TYPE ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>Typography</h2></div>
+    <p class="sec-sub"><strong>Fredoka</strong> brings rounded, playful warmth to headlines (used with restraint). <strong>Nunito Sans</strong> keeps body text friendly and highly readable. <strong>JetBrains Mono</strong> handles the one thing that should look precise: microchip IDs and map coordinates.</p>
+    <div class="card card-pad">
+      <div class="spec"><div class="d-l">Bring Buddy home</div><div class="meta">Display L<br>Fredoka SemiBold · 40/48 · -0.5</div></div>
+      <div class="spec"><div class="h-l">3 pets spotted near you</div><div class="meta">Headline L<br>Fredoka Medium · 28/36</div></div>
+      <div class="spec"><div class="t-l">Last seen this morning</div><div class="meta">Title L<br>Fredoka Medium · 20/28</div></div>
+      <div class="spec"><div class="b-l">A friendly golden retriever, very shy around traffic. Answers to Buddy and loves tennis balls.</div><div class="meta">Body L<br>Nunito Sans · 16/24</div></div>
+      <div class="spec"><div class="lbl" style="color:var(--sprout-700)">REPORT A SIGHTING</div><div class="meta">Label L<br>Nunito Sans ExtraBold · 14 · +0.4</div></div>
+      <div class="spec"><div class="mono" style="font-size:15px">CHIP 985·112·004·872·301</div><div class="meta">Mono / data<br>JetBrains Mono · 13/18</div></div>
+    </div>
+  </section>
+
+  <!-- ============ STATUS SYSTEM ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>Status system</h2></div>
+    <p class="sec-sub">The heart of PawTrace. Every pet has a status, and each one owns a distinct color from the palette — readable at a glance on a busy map or feed.</p>
+    <div class="card card-pad" style="margin-bottom:20px">
+      <div class="badges">
+        <span class="badge b-lost"><span class="b-dot"></span>LOST</span>
+        <span class="badge b-found"><span class="b-dot"></span>FOUND</span>
+        <span class="badge b-search"><span class="b-dot"></span>SEARCHING</span>
+        <span class="badge b-reunited"><span class="b-dot"></span>REUNITED</span>
+      </div>
+    </div>
+
+    <h4 style="font-family:'Fredoka';font-weight:500;font-size:18px;margin:8px 0 16px">The journey — paw-path signature 🐾</h4>
+    <div class="journey">
+      <div class="line"></div>
+      <div class="step done"><div class="node">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="16" rx="5" ry="4"/><circle cx="6" cy="10" r="2"/><circle cx="18" cy="10" r="2"/><circle cx="9" cy="6" r="1.8"/><circle cx="15" cy="6" r="1.8"/></svg>
+      </div><div class="s-label">Reported lost</div><div class="s-sub">Tue, 6:40 PM</div></div>
+      <div class="step now"><div class="node">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </div><div class="s-label">Spotted nearby</div><div class="s-sub">2 sightings today</div></div>
+      <div class="step"><div class="node">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 12 5 5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></svg>
+      </div><div class="s-label">Reunited</div><div class="s-sub">The goal</div></div>
+    </div>
+    <p style="color:var(--bark-500);font-size:14px;margin-top:14px">The dashed paw-path is PawTrace's recurring motif — reused as section dividers, list separators, and the line connecting "last seen" to "found" on the map.</p>
+  </section>
+
+  <!-- ============ COMPONENTS ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>Components</h2></div>
+    <p class="sec-sub">Generously rounded, soft-shadowed, bouncy on press. Built to map cleanly onto Material 3 in Compose.</p>
+
+    <h4 style="font-family:'Fredoka';font-weight:500;font-size:18px;margin:8px 0 14px">Buttons</h4>
+    <div class="card card-pad" style="margin-bottom:24px">
+      <div class="btns">
+        <button class="btn btn-primary">🐾 Report a sighting</button>
+        <button class="btn btn-report">⚠️ Report lost pet</button>
+        <button class="btn btn-secondary">Share poster</button>
+        <button class="btn btn-tertiary">Maybe later</button>
+        <button class="fab" title="Add">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-bottom:24px">
+      <div class="card card-pad">
+        <h4 style="font-family:'Fredoka';font-weight:500;font-size:18px;margin-bottom:14px">Filter chips</h4>
+        <div class="chips">
+          <span class="chip on">🐕 Dogs</span>
+          <span class="chip">🐈 Cats</span>
+          <span class="chip">🦜 Birds</span>
+          <span class="chip">📍 Within 5 km</span>
+          <span class="chip">🕐 Today</span>
+        </div>
+      </div>
+      <div class="card card-pad">
+        <h4 style="font-family:'Fredoka';font-weight:500;font-size:18px;margin-bottom:14px">Text field</h4>
+        <div class="field">
+          <label>Pet's name</label>
+          <input type="text" placeholder="e.g. Buddy" value="Buddy">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Last seen location</label>
+          <input type="text" placeholder="Search an area…">
+        </div>
+      </div>
+    </div>
+
+    <h4 style="font-family:'Fredoka';font-weight:500;font-size:18px;margin:8px 0 14px">Pet card</h4>
+    <div class="grid g3" style="margin-bottom:24px">
+      <div class="pet">
+        <div class="photo" style="background:linear-gradient(135deg,#F5D827,#F59478)">
+          <span class="badge b-lost"><span class="b-dot"></span>LOST</span>
+          <span class="heart"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 12 5 5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></svg></span>
+        </div>
+        <div class="pet-body">
+          <h4>Buddy</h4>
+          <div class="breed">Golden Retriever · 3 yrs</div>
+          <div class="meta-row">📍 1.2 km away · last seen 2h ago</div>
+          <div class="coords">12.9716° N, 77.5946° E</div>
+        </div>
+      </div>
+      <div class="pet">
+        <div class="photo" style="background:linear-gradient(135deg,#A2DC6E,#6BC6B8)">
+          <span class="badge b-found"><span class="b-dot"></span>FOUND</span>
+          <span class="heart"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 12 5 5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></svg></span>
+        </div>
+        <div class="pet-body">
+          <h4>Unknown tabby</h4>
+          <div class="breed">Cat · found, no collar</div>
+          <div class="meta-row">📍 0.6 km away · spotted today</div>
+          <div class="coords">12.9352° N, 77.6245° E</div>
+        </div>
+      </div>
+      <div class="pet">
+        <div class="photo" style="background:linear-gradient(135deg,#C2E7E0,#A2DC6E)">
+          <span class="badge b-reunited"><span class="b-dot"></span>REUNITED</span>
+        </div>
+        <div class="pet-body">
+          <h4>Mochi</h4>
+          <div class="breed">Beagle · home safe 🎉</div>
+          <div class="meta-row">💚 Reunited after 3 days</div>
+          <div class="coords">Thanks to 4 neighbors</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div>
+        <h4 style="font-family:'Fredoka';font-weight:500;font-size:18px;margin:0 0 14px">Alert banner</h4>
+        <div class="alert">
+          <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span>
+          <div><h4>A lost dog was reported near you</h4><p>Buddy went missing 1.2 km away. Tap to see his last known location.</p></div>
+        </div>
+      </div>
+      <div>
+        <h4 style="font-family:'Fredoka';font-weight:500;font-size:18px;margin:0 0 14px">Bottom navigation</h4>
+        <div class="bottomnav">
+          <div class="nav-item on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home</div>
+          <div class="nav-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Map</div>
+          <div class="nav-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Search</div>
+          <div class="nav-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>Profile</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SPACING & RADIUS ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">05</span><h2>Spacing, radius & elevation</h2></div>
+    <p class="sec-sub">A 4dp base grid keeps rhythm consistent. Radii run generous — friendliness lives in the corners. Shadows are soft and warm, never harsh.</p>
+    <div class="grid g2">
+      <div class="card card-pad">
+        <h4 style="font-family:'Fredoka';font-weight:500;font-size:18px;margin-bottom:16px">Spacing · 4dp grid</h4>
+        <div class="scale-row"><span class="mono">space.xs · 4</span><div class="scale-bar" style="width:4px"></div></div>
+        <div class="scale-row"><span class="mono">space.sm · 8</span><div class="scale-bar" style="width:8px"></div></div>
+        <div class="scale-row"><span class="mono">space.md · 16</span><div class="scale-bar" style="width:16px"></div></div>
+        <div class="scale-row"><span class="mono">space.lg · 24</span><div class="scale-bar" style="width:24px"></div></div>
+        <div class="scale-row"><span class="mono">space.xl · 32</span><div class="scale-bar" style="width:32px"></div></div>
+        <div class="scale-row"><span class="mono">space.2xl · 48</span><div class="scale-bar" style="width:48px"></div></div>
+        <div class="scale-row"><span class="mono">space.3xl · 64</span><div class="scale-bar" style="width:64px"></div></div>
+      </div>
+      <div class="card card-pad">
+        <h4 style="font-family:'Fredoka';font-weight:500;font-size:18px;margin-bottom:16px">Corner radius</h4>
+        <div class="radius-demo">
+          <div style="border-radius:8px">xs·8</div>
+          <div style="border-radius:12px">sm·12</div>
+          <div style="border-radius:16px">md·16</div>
+          <div style="border-radius:20px">lg·20</div>
+          <div style="border-radius:28px">xl·28</div>
+          <div style="border-radius:999px">pill</div>
+        </div>
+        <h4 style="font-family:'Fredoka';font-weight:500;font-size:18px;margin:24px 0 16px">Elevation</h4>
+        <div style="display:flex;gap:18px;flex-wrap:wrap">
+          <div style="width:90px;height:60px;border-radius:12px;background:#fff;box-shadow:var(--sh-1);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--bark-500)">e1</div>
+          <div style="width:90px;height:60px;border-radius:12px;background:#fff;box-shadow:var(--sh-2);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--bark-500)">e2</div>
+          <div style="width:90px;height:60px;border-radius:12px;background:#fff;box-shadow:var(--sh-3);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--bark-500)">e3</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMPOSE TOKENS ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">06</span><h2>Compose tokens</h2></div>
+    <p class="sec-sub">Drop-in Kotlin files for your Material 3 theme. Wire Fredoka / Nunito Sans / JetBrains Mono via the <span class="mono">androidx.compose.ui:ui-text-google-fonts</span> provider, or bundle them as <span class="mono">res/font</span> resources.</p>
+    <div class="code-tabs">
+      <span class="code-tab on" data-t="color">Color.kt</span>
+      <span class="code-tab" data-t="type">Type.kt</span>
+      <span class="code-tab" data-t="shape">Shape.kt</span>
+      <span class="code-tab" data-t="theme">Theme.kt</span>
+    </div>
+
+    <div class="code-panel on" id="p-color"><pre><span class="c">// Color.kt — PawTrace palette</span>
+<span class="k">package</span> com.pawtrace.ui.theme
+<span class="k">import</span> androidx.compose.ui.graphics.Color
+
+<span class="c">// Sprout — primary / brand</span>
+<span class="k">val</span> <span class="n">Sprout50</span>  = <span class="t">Color</span>(<span class="s">0xFFEFF9E6</span>)
+<span class="k">val</span> <span class="n">Sprout100</span> = <span class="t">Color</span>(<span class="s">0xFFD9F1C2</span>)
+<span class="k">val</span> <span class="n">Sprout300</span> = <span class="t">Color</span>(<span class="s">0xFFA2DC6E</span>)
+<span class="k">val</span> <span class="n">Sprout400</span> = <span class="t">Color</span>(<span class="s">0xFF88CF4C</span>)
+<span class="k">val</span> <span class="n">Sprout500</span> = <span class="t">Color</span>(<span class="s">0xFF6FB833</span>)   <span class="c">// primary</span>
+<span class="k">val</span> <span class="n">Sprout600</span> = <span class="t">Color</span>(<span class="s">0xFF579522</span>)
+<span class="k">val</span> <span class="n">Sprout700</span> = <span class="t">Color</span>(<span class="s">0xFF43741B</span>)
+<span class="k">val</span> <span class="n">Sprout900</span> = <span class="t">Color</span>(<span class="s">0xFF213A10</span>)
+
+<span class="c">// Sunbeam — secondary / highlight</span>
+<span class="k">val</span> <span class="n">Sun100</span>   = <span class="t">Color</span>(<span class="s">0xFFFCF5B9</span>)
+<span class="k">val</span> <span class="n">Sun400</span>   = <span class="t">Color</span>(<span class="s">0xFFF5D827</span>)
+<span class="k">val</span> <span class="n">Sun700</span>   = <span class="t">Color</span>(<span class="s">0xFF8C7107</span>)
+
+<span class="c">// Lagoon — accent / trust / info</span>
+<span class="k">val</span> <span class="n">Lagoon50</span>  = <span class="t">Color</span>(<span class="s">0xFFE7F5F2</span>)
+<span class="k">val</span> <span class="n">Lagoon300</span> = <span class="t">Color</span>(<span class="s">0xFF6BC6B8</span>)
+<span class="k">val</span> <span class="n">Lagoon500</span> = <span class="t">Color</span>(<span class="s">0xFF3EA094</span>)
+<span class="k">val</span> <span class="n">Lagoon700</span> = <span class="t">Color</span>(<span class="s">0xFF2A736A</span>)
+
+<span class="c">// Coral — Lost / urgent / error</span>
+<span class="k">val</span> <span class="n">Coral50</span>   = <span class="t">Color</span>(<span class="s">0xFFFDEEE9</span>)
+<span class="k">val</span> <span class="n">Coral500</span>  = <span class="t">Color</span>(<span class="s">0xFFF2603C</span>)
+<span class="k">val</span> <span class="n">Coral700</span>  = <span class="t">Color</span>(<span class="s">0xFFC2421F</span>)
+
+<span class="c">// Warm neutrals</span>
+<span class="k">val</span> <span class="n">Cream</span>     = <span class="t">Color</span>(<span class="s">0xFFFBFAF5</span>)
+<span class="k">val</span> <span class="n">Sand</span>      = <span class="t">Color</span>(<span class="s">0xFFF3F0E7</span>)
+<span class="k">val</span> <span class="n">BorderTan</span> = <span class="t">Color</span>(<span class="s">0xFFE6E1D5</span>)
+<span class="k">val</span> <span class="n">Bark500</span>   = <span class="t">Color</span>(<span class="s">0xFF6E6857</span>)
+<span class="k">val</span> <span class="n">Bark700</span>   = <span class="t">Color</span>(<span class="s">0xFF4A463B</span>)
+<span class="k">val</span> <span class="n">Bark900</span>   = <span class="t">Color</span>(<span class="s">0xFF2A271F</span>)
+
+<span class="c">// Status helpers (use in badges / map pins)</span>
+<span class="k">val</span> <span class="n">StatusLost</span>     = Coral500
+<span class="k">val</span> <span class="n">StatusFound</span>    = Sprout500
+<span class="k">val</span> <span class="n">StatusSearching</span> = Sun400
+<span class="k">val</span> <span class="n">StatusReunited</span> = Lagoon500</pre></div>
+
+    <div class="code-panel" id="p-type"><pre><span class="c">// Type.kt — Fredoka + Nunito Sans + JetBrains Mono</span>
+<span class="k">package</span> com.pawtrace.ui.theme
+<span class="k">import</span> androidx.compose.material3.Typography
+<span class="k">import</span> androidx.compose.ui.text.TextStyle
+<span class="k">import</span> androidx.compose.ui.text.font.FontFamily
+<span class="k">import</span> androidx.compose.ui.text.font.FontWeight
+<span class="k">import</span> androidx.compose.ui.unit.sp
+
+<span class="c">// Define these FontFamily objects from res/font or Google Fonts provider</span>
+<span class="c">// val Fredoka = FontFamily( Font(R.font.fredoka_medium, FontWeight.Medium), ... )</span>
+<span class="c">// val Nunito  = FontFamily( Font(R.font.nunitosans_regular), ... )</span>
+<span class="c">// val Mono    = FontFamily( Font(R.font.jetbrainsmono_regular) )</span>
+
+<span class="k">val</span> <span class="n">PawType</span> = <span class="t">Typography</span>(
+  displayLarge  = <span class="t">TextStyle</span>(fontFamily = Fredoka, fontWeight = FontWeight.SemiBold,
+                            fontSize = <span class="s">40</span>.sp, lineHeight = <span class="s">48</span>.sp, letterSpacing = (-<span class="s">0.5</span>).sp),
+  headlineLarge = <span class="t">TextStyle</span>(fontFamily = Fredoka, fontWeight = FontWeight.Medium,
+                            fontSize = <span class="s">28</span>.sp, lineHeight = <span class="s">36</span>.sp),
+  headlineMedium= <span class="t">TextStyle</span>(fontFamily = Fredoka, fontWeight = FontWeight.Medium,
+                            fontSize = <span class="s">24</span>.sp, lineHeight = <span class="s">32</span>.sp),
+  titleLarge    = <span class="t">TextStyle</span>(fontFamily = Fredoka, fontWeight = FontWeight.Medium,
+                            fontSize = <span class="s">20</span>.sp, lineHeight = <span class="s">28</span>.sp),
+  bodyLarge     = <span class="t">TextStyle</span>(fontFamily = Nunito,  fontWeight = FontWeight.Normal,
+                            fontSize = <span class="s">16</span>.sp, lineHeight = <span class="s">24</span>.sp),
+  bodyMedium    = <span class="t">TextStyle</span>(fontFamily = Nunito,  fontWeight = FontWeight.Normal,
+                            fontSize = <span class="s">14</span>.sp, lineHeight = <span class="s">20</span>.sp),
+  labelLarge    = <span class="t">TextStyle</span>(fontFamily = Nunito,  fontWeight = FontWeight.ExtraBold,
+                            fontSize = <span class="s">14</span>.sp, lineHeight = <span class="s">20</span>.sp, letterSpacing = <span class="s">0.4</span>.sp),
+)
+
+<span class="c">// For chip IDs / coordinates, apply Mono inline:</span>
+<span class="c">// Text("985 112 004", fontFamily = Mono, style = PawType.bodyMedium)</span></pre></div>
+
+    <div class="code-panel" id="p-shape"><pre><span class="c">// Shape.kt — generous, friendly corners</span>
+<span class="k">package</span> com.pawtrace.ui.theme
+<span class="k">import</span> androidx.compose.foundation.shape.RoundedCornerShape
+<span class="k">import</span> androidx.compose.material3.Shapes
+<span class="k">import</span> androidx.compose.ui.unit.dp
+
+<span class="k">val</span> <span class="n">PawShapes</span> = <span class="t">Shapes</span>(
+  extraSmall = <span class="t">RoundedCornerShape</span>(<span class="s">8</span>.dp),
+  small      = <span class="t">RoundedCornerShape</span>(<span class="s">12</span>.dp),
+  medium     = <span class="t">RoundedCornerShape</span>(<span class="s">16</span>.dp),   <span class="c">// text fields, chips</span>
+  large      = <span class="t">RoundedCornerShape</span>(<span class="s">20</span>.dp),   <span class="c">// cards</span>
+  extraLarge = <span class="t">RoundedCornerShape</span>(<span class="s">28</span>.dp),   <span class="c">// FAB, sheets</span>
+)
+<span class="c">// Pills: use RoundedCornerShape(percent = 50) on buttons & badges.</span>
+
+<span class="c">// Spacing scale — keep as a simple object</span>
+<span class="k">object</span> <span class="n">Space</span> {
+  <span class="k">val</span> xs = <span class="s">4</span>.dp;  <span class="k">val</span> sm = <span class="s">8</span>.dp;  <span class="k">val</span> md = <span class="s">16</span>.dp
+  <span class="k">val</span> lg = <span class="s">24</span>.dp; <span class="k">val</span> xl = <span class="s">32</span>.dp; <span class="k">val</span> xxl = <span class="s">48</span>.dp
+}</pre></div>
+
+    <div class="code-panel" id="p-theme"><pre><span class="c">// Theme.kt — wiring it together (light scheme)</span>
+<span class="k">package</span> com.pawtrace.ui.theme
+<span class="k">import</span> androidx.compose.material3.MaterialTheme
+<span class="k">import</span> androidx.compose.material3.lightColorScheme
+<span class="k">import</span> androidx.compose.runtime.Composable
+
+<span class="k">private val</span> <span class="n">PawLight</span> = <span class="t">lightColorScheme</span>(
+  primary            = Sprout500,
+  onPrimary          = Color.White,
+  primaryContainer   = Sprout100,
+  onPrimaryContainer = Sprout900,
+  secondary          = Lagoon500,        <span class="c">// trust / info</span>
+  onSecondary        = Color.White,
+  tertiary           = Sun400,           <span class="c">// highlight</span>
+  onTertiary         = Bark900,
+  error              = Coral500,         <span class="c">// Lost / destructive</span>
+  onError            = Color.White,
+  errorContainer     = Coral50,
+  background         = Cream,
+  onBackground       = Bark900,
+  surface            = Color.White,
+  onSurface          = Bark900,
+  surfaceVariant     = Sand,
+  onSurfaceVariant   = Bark700,
+  outline            = BorderTan,
+)
+
+<span class="k">@Composable</span>
+<span class="k">fun</span> <span class="n">PawTraceTheme</span>(content: <span class="k">@Composable</span> () -> Unit) {
+  <span class="t">MaterialTheme</span>(
+    colorScheme = PawLight,
+    typography  = PawType,
+    shapes      = PawShapes,
+    content     = content,
+  )
+}</pre></div>
+  </section>
+
+  <!-- ============ PRINCIPLES ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">07</span><h2>Voice &amp; copy</h2></div>
+    <p class="sec-sub">Words are design material. PawTrace speaks like a calm, helpful neighbor — plain verbs, sentence case, and never vague when it matters most.</p>
+    <div class="card card-pad">
+      <div class="principle" style="margin-bottom:20px"><span class="pnum">01</span><div><h4>Name the action, not the system</h4><p>"Report a sighting," not "Submit form." The button that says "Mark as reunited" produces a toast that says "Reunited 🎉".</p></div></div>
+      <div class="principle" style="margin-bottom:20px"><span class="pnum">02</span><div><h4>Errors guide, they don't apologize</h4><p>"We couldn't find that area — try a nearby landmark," not "Oops! Something went wrong."</p></div></div>
+      <div class="principle"><span class="pnum">03</span><div><h4>Empty states invite action</h4><p>"No pets reported nearby — that's good news. Be the first to help if something changes."</p></div></div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="disp">🐾 PawTrace</div>
+      <small>Design System v1 · inspired by MindMarket's playful warmth</small>
+    </div>
+    <small>Sprout · Sunbeam · Lagoon · Coral &nbsp;/&nbsp; Fredoka + Nunito Sans</small>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.code-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.code-tab').forEach(t=>t.classList.remove('on'));
+    document.querySelectorAll('.code-panel').forEach(p=>p.classList.remove('on'));
+    tab.classList.add('on');
+    document.getElementById('p-'+tab.dataset.t).classList.add('on');
+  });
+});
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('on')));
+</script>
+</body>
+</html>
