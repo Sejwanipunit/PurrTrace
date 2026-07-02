@@ -6,7 +6,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 // Row mappers (snake_case DB → camelCase app types)
 // ============================================================================
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function rowToSighting(r: any): Sighting {
+export function rowToSighting(r: any): Sighting {
   return {
     id: r.id,
     petId: r.pet_id,
@@ -19,7 +19,7 @@ function rowToSighting(r: any): Sighting {
   };
 }
 
-function rowToPet(r: any, sightings: Sighting[]): Pet {
+export function rowToPet(r: any, sightings: Sighting[]): Pet {
   return {
     id: r.id,
     name: r.name,

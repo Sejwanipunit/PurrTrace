@@ -4,6 +4,7 @@ import { useAppStore } from '../context/AppStore';
 import { Button } from '../components/Button';
 import { PawIcon } from '../components/PawPath';
 import { uploadPhoto } from '../data/petsService';
+import { getCurrentLocation, reverseGeocode } from '../lib/geolocation';
 import type { NewPet, Species } from '../types';
 import './ReportLost.css';
 
@@ -113,11 +114,31 @@ export function ReportLost() {
   const { addPet, showToast, currentUser } = useAppStore();
   const navigate = useNavigate();
 
+  const [locStatus, setLocStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [locMessage, setLocMessage] = useState('');
+
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setPhotoFile(file);
     setForm(prev => ({ ...prev, photoUrl: URL.createObjectURL(file) }));
+  };
+
+  const useMyLocation = async () => {
+    setLocStatus('loading');
+    setLocMessage('Getting your location…');
+    try {
+      const { lat, lng } = await getCurrentLocation();
+      setForm(prev => ({ ...prev, locationLat: lat.toFixed(5), locationLng: lng.toFixed(5) }));
+      const label = await reverseGeocode(lat, lng);
+      if (label) setForm(prev => ({ ...prev, locationLabel: prev.locationLabel || label }));
+      setLocStatus('done');
+      setLocMessage(label ? `Pinned · ${label}` : 'Location pinned');
+      setErrors(prev => { const n = { ...prev }; delete n.locationLabel; return n; });
+    } catch (err) {
+      setLocStatus('error');
+      setLocMessage(err instanceof Error ? err.message : 'Couldn’t get your location.');
+    }
   };
 
   const set = (k: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -289,6 +310,24 @@ export function ReportLost() {
                 Where did you last see <strong>{form.name || 'your pet'}</strong>?
               </p>
             </div>
+
+            <button
+              type="button"
+              className={`use-location-btn ${locStatus === 'done' ? 'use-location-done' : ''}`}
+              onClick={useMyLocation}
+              disabled={locStatus === 'loading'}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="18" height="18" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              {locStatus === 'loading' ? 'Locating…' : locStatus === 'done' ? 'Location pinned' : 'Use my current location'}
+            </button>
+            {locMessage && (
+              <p className={`loc-status t-body-s ${locStatus === 'error' ? 'loc-status-error' : ''}`} role="status">
+                {locMessage}
+              </p>
+            )}
 
             <TextField
               label="Location name"

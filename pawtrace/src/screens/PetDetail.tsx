@@ -12,7 +12,7 @@ import './PetDetail.css';
 
 export function PetDetail() {
   const { id } = useParams<{ id: string }>();
-  const { pets, loading, error, markReunited, showToast } = useAppStore();
+  const { pets, loading, error, markReunited, showToast, currentUser } = useAppStore();
   const navigate = useNavigate();
   const [showContact, setShowContact] = useState(false);
 
@@ -89,7 +89,7 @@ export function PetDetail() {
               {pet.breed}{pet.ageYears ? `, ${pet.ageYears} year${pet.ageYears !== 1 ? 's' : ''} old` : ''}
             </p>}
           </div>
-          {pet.status !== 'reunited' && (
+          {pet.status !== 'reunited' && pet.reportedById === currentUser.id && (
             <Button variant="secondary" onClick={handleReunited} aria-label="Mark as reunited">
               Mark reunited
             </Button>

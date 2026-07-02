@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../context/AppStore';
 import { Button } from '../components/Button';
 import { uploadPhoto } from '../data/petsService';
+import { getCurrentLocation, reverseGeocode } from '../lib/geolocation';
 import type { NewSighting } from '../types';
 import './ReportSighting.css';
 
@@ -28,11 +29,36 @@ export function ReportSighting() {
   const [submitting, setSubmitting] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [locStatus, setLocStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [locMessage, setLocMessage] = useState('');
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm(prev => ({ ...prev, [k]: e.target.value }));
     if (errors[k]) setErrors(prev => { const n = { ...prev }; delete n[k]; return n; });
   };
+
+  // Capture the device's location and fill lat/lng + a friendly place label.
+  const useMyLocation = useCallback(async () => {
+    setLocStatus('loading');
+    setLocMessage('Getting your location…');
+    try {
+      const { lat, lng } = await getCurrentLocation();
+      setForm(prev => ({ ...prev, lat: lat.toFixed(5), lng: lng.toFixed(5) }));
+      const label = await reverseGeocode(lat, lng);
+      setForm(prev => ({ ...prev, locationLabel: prev.locationLabel || label || prev.locationLabel }));
+      setLocStatus('done');
+      setLocMessage(label ? `Using your location · ${label}` : 'Using your current location');
+    } catch (err) {
+      setLocStatus('error');
+      setLocMessage(err instanceof Error ? err.message : 'Couldn’t get your location.');
+    }
+  }, []);
+
+  // Try to grab location automatically when the screen opens (prompts for permission).
+  useEffect(() => {
+    useMyLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -127,6 +153,24 @@ export function ReportSighting() {
           />
           {errors.note && <p className="field-error t-body-s" id="note-err" role="alert">{errors.note}</p>}
         </div>
+
+        <button
+          type="button"
+          className={`use-location-btn ${locStatus === 'done' ? 'use-location-done' : ''}`}
+          onClick={useMyLocation}
+          disabled={locStatus === 'loading'}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="18" height="18" aria-hidden="true">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          {locStatus === 'loading' ? 'Locating…' : locStatus === 'done' ? 'Location captured' : 'Use my current location'}
+        </button>
+        {locMessage && (
+          <p className={`loc-status t-body-s ${locStatus === 'error' ? 'loc-status-error' : ''}`} role="status">
+            {locMessage}
+          </p>
+        )}
 
         <TextField
           label="Where did you see them? (optional)"

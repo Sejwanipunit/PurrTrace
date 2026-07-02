@@ -150,3 +150,23 @@ values
   ('Luna','cat','Siamese',4,'reunited','https://picsum.photos/seed/lunacat/400/300','Found by a kind neighbour 2 streets away. Home safe!',12.9800,77.5900,'Sadashivanagar Market', now() - interval '4 days','Deepa Krishnan'),
   ('Unknown tabby','cat',null,null,'found','https://picsum.photos/seed/tabby/400/300','Ginger tabby, no collar, near JP Nagar. Looking for owner.',12.9063,77.5857,'JP Nagar 6th Phase', now() - interval '8 hours','Community PawTrace')
 on conflict do nothing;
+
+-- ============================================================================
+-- Realtime — broadcast inserts/updates/deletes on pets & sightings so the
+-- map and notifications update live. (Idempotent.)
+-- ============================================================================
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'pets'
+  ) then
+    alter publication supabase_realtime add table public.pets;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'sightings'
+  ) then
+    alter publication supabase_realtime add table public.sightings;
+  end if;
+end $$;
