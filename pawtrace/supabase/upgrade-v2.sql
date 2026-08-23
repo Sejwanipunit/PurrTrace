@@ -39,3 +39,7 @@ as $$
   update public.profiles set reunited_count = reunited_count + 1
   where id = uid and id = auth.uid();
 $$;
+
+-- ---------- v3: reward field on reports ----------
+-- Optional reward offer shown on the pet page and the shareable poster.
+alter table public.pets add column if not exists reward text;

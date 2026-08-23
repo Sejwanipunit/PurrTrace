@@ -268,3 +268,19 @@
   border-radius: var(--r-md);
   display: block;
 }
+
+.reward-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--s-md);
+  padding: var(--s-md) var(--s-lg);
+  margin-bottom: var(--s-md);
+  border-radius: var(--r-lg);
+  background: var(--sun-100);
+  border: 1.5px solid var(--sun-300);
+  color: var(--sun-700);
+}
+.reward-banner svg { flex-shrink: 0; }
+.reward-banner > div { display: flex; flex-direction: column; }
+.reward-label { color: var(--bark-500); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+.reward-amount { color: var(--bark-900); font-family: 'Fredoka', sans-serif; }

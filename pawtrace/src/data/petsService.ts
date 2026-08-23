@@ -30,6 +30,7 @@ export function rowToPet(r: any, sightings: Sighting[]): Pet {
     photoUrl: r.photo_url ?? undefined,
     description: r.description ?? undefined,
     microchipId: r.microchip_id ?? undefined,
+    reward: r.reward ?? undefined,
     lastSeen: {
       lat: r.last_seen_lat,
       lng: r.last_seen_lng,
@@ -112,6 +113,7 @@ export async function addPet(input: NewPet): Promise<Pet> {
         photo_url: input.photoUrl ?? null,
         description: input.description ?? null,
         microchip_id: input.microchipId ?? null,
+        reward: input.reward ?? null,
         last_seen_lat: input.lastSeen.lat,
         last_seen_lng: input.lastSeen.lng,
         last_seen_label: input.lastSeen.label,
@@ -136,6 +138,7 @@ export async function addPet(input: NewPet): Promise<Pet> {
     photoUrl: input.photoUrl,
     description: input.description,
     microchipId: input.microchipId,
+    reward: input.reward,
     lastSeen: input.lastSeen,
     distanceKm: 0.5,
     sightings: [],
@@ -193,6 +196,7 @@ export async function updatePet(id: string, patch: Partial<NewPet>): Promise<Pet
     if ('photoUrl' in patch) row.photo_url = patch.photoUrl ?? null;
     if ('description' in patch) row.description = patch.description ?? null;
     if ('microchipId' in patch) row.microchip_id = patch.microchipId ?? null;
+    if ('reward' in patch) row.reward = patch.reward ?? null;
     if (patch.lastSeen) {
       row.last_seen_lat = patch.lastSeen.lat;
       row.last_seen_lng = patch.lastSeen.lng;
@@ -222,6 +226,7 @@ export async function updatePet(id: string, patch: Partial<NewPet>): Promise<Pet
           photoUrl: 'photoUrl' in patch ? patch.photoUrl : p.photoUrl,
           description: 'description' in patch ? patch.description : p.description,
           microchipId: 'microchipId' in patch ? patch.microchipId : p.microchipId,
+          reward: 'reward' in patch ? patch.reward : p.reward,
           lastSeen: patch.lastSeen ?? p.lastSeen,
         }
       : p

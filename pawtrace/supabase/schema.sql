@@ -28,6 +28,7 @@ create table if not exists public.pets (
   photo_url        text,
   description      text,
   microchip_id     text,
+  reward           text,
   last_seen_lat    double precision not null,
   last_seen_lng    double precision not null,
   last_seen_label  text not null,

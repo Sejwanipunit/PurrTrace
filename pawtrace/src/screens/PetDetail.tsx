@@ -142,6 +142,19 @@ export function PetDetail() {
           </div>
         )}
 
+        {pet.reward && pet.status !== 'reunited' && (
+          <div className="reward-banner" role="note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="22" height="22" aria-hidden="true">
+              <circle cx="12" cy="8" r="6"/>
+              <path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/>
+            </svg>
+            <div>
+              <span className="reward-label t-body-s">Reward offered</span>
+              <span className="reward-amount t-title">{pet.reward}</span>
+            </div>
+          </div>
+        )}
+
         <PawPath count={5} />
 
         {/* Journey tracker */}

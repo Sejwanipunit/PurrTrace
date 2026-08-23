@@ -22,6 +22,7 @@ export interface Pet {
   photoUrl?: string;
   description?: string;
   microchipId?: string;
+  reward?: string;           // optional reward offer, e.g. "₹5,000"
   lastSeen: { lat: number; lng: number; label: string; at: string };
   distanceKm?: number;
   sightings: Sighting[];
@@ -40,6 +41,7 @@ export interface NewPet {
   photoUrl?: string;
   description?: string;
   microchipId?: string;
+  reward?: string;
   lastSeen: { lat: number; lng: number; label: string; at: string };
   reportedById: string;
   reportedByName: string;

@@ -16,6 +16,7 @@ interface FormData {
   ageYears: string;
   description: string;
   microchipId: string;
+  reward: string;
   photoUrl: string;
   locationLabel: string;
   locationLat: string;
@@ -28,7 +29,7 @@ interface Errors {
 
 const INITIAL: FormData = {
   name: '', species: '', breed: '', ageYears: '', description: '',
-  microchipId: '', photoUrl: '', locationLabel: '', locationLat: '', locationLng: '',
+  microchipId: '', reward: '', photoUrl: '', locationLabel: '', locationLat: '', locationLng: '',
 };
 
 function validateStep1(f: FormData): Errors {
@@ -134,6 +135,7 @@ export function ReportLost() {
       ageYears: editingPet.ageYears != null ? String(editingPet.ageYears) : '',
       description: editingPet.description ?? '',
       microchipId: editingPet.microchipId ?? '',
+      reward: editingPet.reward ?? '',
       photoUrl: editingPet.photoUrl ?? '',
       locationLabel: editingPet.lastSeen.label,
       locationLat: editingPet.lastSeen.lat.toFixed(5),
@@ -248,6 +250,7 @@ export function ReportLost() {
           photoUrl,
           description: form.description.trim() || undefined,
           microchipId: form.microchipId.trim() || undefined,
+          reward: form.reward.trim() || undefined,
           lastSeen: {
             lat,
             lng,
@@ -273,6 +276,7 @@ export function ReportLost() {
         photoUrl,
         description: form.description.trim() || undefined,
         microchipId: form.microchipId.trim() || undefined,
+        reward: form.reward.trim() || undefined,
         lastSeen: {
           lat,
           lng,
@@ -387,6 +391,14 @@ export function ReportLost() {
               value={form.microchipId}
               onChange={set('microchipId')}
               hint="15-digit ISO chip number if available"
+            />
+            <TextField
+              label="Reward (optional)"
+              id="reward"
+              placeholder="e.g. ₹5,000"
+              value={form.reward}
+              onChange={set('reward')}
+              hint="Offering a reward can help — shown on the pet page and poster"
             />
             <div className="step-nav">
               <Button variant="secondary" onClick={() => setStep(1)}>← Back</Button>
