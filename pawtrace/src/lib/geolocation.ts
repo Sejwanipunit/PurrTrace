@@ -22,6 +22,27 @@ export function getCurrentLocation(timeout = 10000): Promise<Coords> {
 }
 
 /**
+ * Turn a free-text place label into coordinates using the free OpenStreetMap
+ * Nominatim service (no API key). Returns null on any failure.
+ */
+export async function geocodeLabel(label: string): Promise<Coords | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(label)}`,
+      { headers: { Accept: 'application/json' } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (Array.isArray(data) && data[0]?.lat && data[0]?.lon) {
+      return { lat: Number(data[0].lat), lng: Number(data[0].lon) };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Turn coordinates into a friendly place label using the free OpenStreetMap
  * Nominatim service (no API key). Returns null on any failure.
  */

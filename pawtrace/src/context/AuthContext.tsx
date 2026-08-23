@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { removePushSubscription } from '../lib/push';
 import type { User } from '../types';
 
 interface AuthState {
@@ -78,6 +79,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     if (!supabase) return;
+    // Stop push alerts for this device before the session (and RLS access) goes away.
+    await removePushSubscription();
     await supabase.auth.signOut();
     setUser(null);
   }, []);

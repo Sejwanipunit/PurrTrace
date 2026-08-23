@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAppStore } from '../context/AppStore';
 import { Button } from '../components/Button';
 import { PawIcon } from '../components/PawPath';
+import { LocationPicker } from '../components/LocationPicker';
 import { uploadPhoto } from '../data/petsService';
-import { getCurrentLocation, reverseGeocode } from '../lib/geolocation';
+import { getCurrentLocation, reverseGeocode, geocodeLabel, type Coords } from '../lib/geolocation';
 import type { NewPet, Species } from '../types';
 import './ReportLost.css';
 
@@ -111,20 +112,56 @@ export function ReportLost() {
   const [submitting, setSubmitting] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { addPet, showToast, currentUser } = useAppStore();
+  const { pets, loading, addPet, updatePet, showToast, currentUser } = useAppStore();
   const navigate = useNavigate();
 
   const [locStatus, setLocStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [locMessage, setLocMessage] = useState('');
 
+  // ----- Edit mode (/edit/:id): prefill from the existing report -----
+  const { id: editId } = useParams<{ id: string }>();
+  const editingPet = editId ? pets.find(p => p.id === editId) : undefined;
+  const isEdit = Boolean(editId);
+  const prefilled = useRef(false);
+
+  useEffect(() => {
+    if (!editingPet || prefilled.current) return;
+    prefilled.current = true;
+    setForm({
+      name: editingPet.name,
+      species: editingPet.species,
+      breed: editingPet.breed ?? '',
+      ageYears: editingPet.ageYears != null ? String(editingPet.ageYears) : '',
+      description: editingPet.description ?? '',
+      microchipId: editingPet.microchipId ?? '',
+      photoUrl: editingPet.photoUrl ?? '',
+      locationLabel: editingPet.lastSeen.label,
+      locationLat: editingPet.lastSeen.lat.toFixed(5),
+      locationLng: editingPet.lastSeen.lng.toFixed(5),
+    });
+  }, [editingPet]);
+
+  // Only the reporter may edit; bounce everyone else back.
+  useEffect(() => {
+    if (!isEdit || loading) return;
+    if (!editingPet || editingPet.reportedById !== currentUser.id) {
+      navigate(editingPet ? `/pet/${editingPet.id}` : '/', { replace: true });
+    }
+  }, [isEdit, loading, editingPet, currentUser.id, navigate]);
+
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      showToast('That photo is too large — please pick one under 8 MB.');
+      e.target.value = '';
+      return;
+    }
     setPhotoFile(file);
     setForm(prev => ({ ...prev, photoUrl: URL.createObjectURL(file) }));
   };
 
-  const useMyLocation = async () => {
+  const captureLocation = async () => {
     setLocStatus('loading');
     setLocMessage('Getting your location…');
     try {
@@ -138,6 +175,24 @@ export function ReportLost() {
     } catch (err) {
       setLocStatus('error');
       setLocMessage(err instanceof Error ? err.message : 'Couldn’t get your location.');
+    }
+  };
+
+  // Picked spot shown on the mini map; coordinates live in the form state.
+  const pickedLocation: Coords | null =
+    form.locationLat && form.locationLng
+      ? { lat: Number(form.locationLat), lng: Number(form.locationLng) }
+      : null;
+
+  const onPickLocation = async ({ lat, lng }: Coords) => {
+    setForm(prev => ({ ...prev, locationLat: lat.toFixed(5), locationLng: lng.toFixed(5) }));
+    setErrors(prev => { const n = { ...prev }; delete n.locationLabel; return n; });
+    setLocStatus('done');
+    setLocMessage('Location pinned');
+    const label = await reverseGeocode(lat, lng);
+    if (label) {
+      setForm(prev => ({ ...prev, locationLabel: prev.locationLabel || label }));
+      setLocMessage(`Pinned · ${label}`);
     }
   };
 
@@ -169,6 +224,46 @@ export function ReportLost() {
         photoUrl = `https://picsum.photos/seed/${encodeURIComponent(form.name.trim())}/400/300`;
       }
 
+      // Resolve coordinates: manual entry > geocoded location name. Never pin
+      // the report to an arbitrary default city.
+      let lat = Number(form.locationLat);
+      let lng = Number(form.locationLng);
+      if (!lat || !lng) {
+        const geo = await geocodeLabel(form.locationLabel.trim());
+        if (!geo) {
+          setErrors({ locationLabel: 'We couldn’t find that place — tap the map to drop a pin or use your current location.' });
+          setSubmitting(false);
+          return;
+        }
+        lat = geo.lat;
+        lng = geo.lng;
+      }
+
+      if (isEdit && editingPet) {
+        await updatePet(editingPet.id, {
+          name: form.name.trim(),
+          species: form.species as Species,
+          breed: form.breed.trim() || undefined,
+          ageYears: form.ageYears ? Number(form.ageYears) : undefined,
+          photoUrl,
+          description: form.description.trim() || undefined,
+          microchipId: form.microchipId.trim() || undefined,
+          lastSeen: {
+            lat,
+            lng,
+            label: form.locationLabel.trim(),
+            // Keep the original sighting time unless the spot actually moved.
+            at:
+              lat === editingPet.lastSeen.lat && lng === editingPet.lastSeen.lng
+                ? editingPet.lastSeen.at
+                : new Date().toISOString(),
+          },
+        });
+        showToast('Report updated');
+        navigate(`/pet/${editingPet.id}`);
+        return;
+      }
+
       const input: NewPet = {
         name: form.name.trim(),
         species: form.species as Species,
@@ -179,8 +274,8 @@ export function ReportLost() {
         description: form.description.trim() || undefined,
         microchipId: form.microchipId.trim() || undefined,
         lastSeen: {
-          lat: Number(form.locationLat) || 12.9716,
-          lng: Number(form.locationLng) || 77.5946,
+          lat,
+          lng,
           label: form.locationLabel.trim(),
           at: new Date().toISOString(),
         },
@@ -205,8 +300,10 @@ export function ReportLost() {
           </svg>
         </button>
         <div>
-          <h1 className="t-headline">Report a lost pet</h1>
-          <p className="t-body-s" style={{ color: 'var(--bark-500)' }}>Help us help you find them</p>
+          <h1 className="t-headline">{isEdit ? 'Edit report' : 'Report a lost pet'}</h1>
+          <p className="t-body-s" style={{ color: 'var(--bark-500)' }}>
+            {isEdit ? `Update ${editingPet?.name ?? 'your pet'}’s details` : 'Help us help you find them'}
+          </p>
         </div>
       </header>
 
@@ -314,7 +411,7 @@ export function ReportLost() {
             <button
               type="button"
               className={`use-location-btn ${locStatus === 'done' ? 'use-location-done' : ''}`}
-              onClick={useMyLocation}
+              onClick={captureLocation}
               disabled={locStatus === 'loading'}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="18" height="18" aria-hidden="true">
@@ -329,6 +426,11 @@ export function ReportLost() {
               </p>
             )}
 
+            <div className="field-group">
+              <span className="field-label t-label">Pin the spot</span>
+              <LocationPicker value={pickedLocation} onChange={onPickLocation} height="240px" />
+            </div>
+
             <TextField
               label="Location name"
               id="locationLabel"
@@ -337,24 +439,6 @@ export function ReportLost() {
               onChange={set('locationLabel')}
               required
               error={errors.locationLabel}
-            />
-            <TextField
-              label="Latitude (optional)"
-              id="locationLat"
-              type="number"
-              step="0.00001"
-              placeholder="12.9716"
-              value={form.locationLat}
-              onChange={set('locationLat')}
-            />
-            <TextField
-              label="Longitude (optional)"
-              id="locationLng"
-              type="number"
-              step="0.00001"
-              placeholder="77.5946"
-              value={form.locationLng}
-              onChange={set('locationLng')}
             />
 
             <div className="report-summary">
@@ -369,8 +453,10 @@ export function ReportLost() {
 
             <div className="step-nav">
               <Button variant="secondary" onClick={() => setStep(2)}>← Back</Button>
-              <Button variant="lost" onClick={submit} disabled={submitting}>
-                {submitting ? 'Reporting…' : `Report ${form.name || 'pet'} as lost`}
+              <Button variant={isEdit ? 'primary' : 'lost'} onClick={submit} disabled={submitting}>
+                {submitting
+                  ? (isEdit ? 'Saving…' : 'Reporting…')
+                  : (isEdit ? 'Save changes' : `Report ${form.name || 'pet'} as lost`)}
               </Button>
             </div>
           </div>

@@ -2,10 +2,11 @@ import { useAppStore } from '../context/AppStore';
 import { useAuth } from '../context/AuthContext';
 import { PetCard } from '../components/PetCard';
 import { PawPath } from '../components/PawPath';
+import { isFreshReport, REPORT_TTL_DAYS } from '../lib/time';
 import './Profile.css';
 
 export function Profile() {
-  const { pets, currentUser, darkMode, setDarkMode } = useAppStore();
+  const { pets, currentUser, darkMode, setDarkMode, nearbyAlerts, setNearbyAlerts, shareLocation, setShareLocation } = useAppStore();
   const { signOut, mockMode } = useAuth();
 
   const myPets = pets.filter(p => p.reportedById === currentUser.id);
@@ -79,6 +80,11 @@ export function Profile() {
         {myPets.length > 0 && (
           <section aria-labelledby="my-pets-label">
             <h2 className="t-title section-label" id="my-pets-label">My reports</h2>
+            {myPets.some(p => !isFreshReport(p.createdAt)) && (
+              <p className="t-body-s" style={{ color: 'var(--bark-500)', marginBottom: 8 }}>
+                Reports older than {REPORT_TTL_DAYS} days are archived — only you can see them here.
+              </p>
+            )}
             <div className="profile-list">
               {myPets.map(pet => (
                 <PetCard key={pet.id} pet={pet} variant="horizontal" />
@@ -128,9 +134,10 @@ export function Profile() {
                 <p className="t-body-s" style={{ color: 'var(--bark-500)' }}>Get notified about pets in your area</p>
               </div>
               <button
-                className="toggle toggle-on"
+                className={`toggle ${nearbyAlerts ? 'toggle-on' : ''}`}
+                onClick={() => setNearbyAlerts(!nearbyAlerts)}
                 role="switch"
-                aria-checked={true}
+                aria-checked={nearbyAlerts}
                 aria-label="Toggle nearby alerts"
               >
                 <span className="toggle-thumb" />
@@ -143,9 +150,10 @@ export function Profile() {
                 <p className="t-body-s" style={{ color: 'var(--bark-500)' }}>Help with distance calculations</p>
               </div>
               <button
-                className="toggle"
+                className={`toggle ${shareLocation ? 'toggle-on' : ''}`}
+                onClick={() => setShareLocation(!shareLocation)}
                 role="switch"
-                aria-checked={false}
+                aria-checked={shareLocation}
                 aria-label="Toggle location sharing"
               >
                 <span className="toggle-thumb" />

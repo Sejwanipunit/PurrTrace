@@ -53,6 +53,18 @@ create table if not exists public.sightings (
 );
 create index if not exists sightings_pet_id_idx on public.sightings (pet_id);
 
+-- ---------- push_subscriptions ----------
+-- One row per device that opted into Web Push. Read by the push-notify
+-- Edge Function (service role); users manage only their own rows.
+create table if not exists public.push_subscriptions (
+  endpoint   text primary key,
+  user_id    uuid not null references public.profiles (id) on delete cascade,
+  p256dh     text not null,
+  auth       text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists push_subs_user_idx on public.push_subscriptions (user_id);
+
 -- ============================================================================
 -- Auto-create a profile row when a new auth user signs up (Google OAuth, etc.)
 -- ============================================================================
@@ -82,9 +94,20 @@ create trigger on_auth_user_created
 -- Row Level Security
 -- Reads are public (a community board); writes require auth + ownership.
 -- ============================================================================
-alter table public.profiles  enable row level security;
-alter table public.pets      enable row level security;
-alter table public.sightings enable row level security;
+alter table public.profiles           enable row level security;
+alter table public.pets               enable row level security;
+alter table public.sightings          enable row level security;
+alter table public.push_subscriptions enable row level security;
+
+-- push_subscriptions — each user manages only their own devices
+drop policy if exists "push_subs_select" on public.push_subscriptions;
+drop policy if exists "push_subs_insert" on public.push_subscriptions;
+drop policy if exists "push_subs_update" on public.push_subscriptions;
+drop policy if exists "push_subs_delete" on public.push_subscriptions;
+create policy "push_subs_select" on public.push_subscriptions for select using (auth.uid() = user_id);
+create policy "push_subs_insert" on public.push_subscriptions for insert with check (auth.uid() = user_id);
+create policy "push_subs_update" on public.push_subscriptions for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "push_subs_delete" on public.push_subscriptions for delete using (auth.uid() = user_id);
 
 -- profiles
 drop policy if exists "profiles_read"   on public.profiles;
@@ -134,7 +157,10 @@ returns void
 language sql
 security definer set search_path = public
 as $$
-  update public.profiles set reunited_count = reunited_count + 1 where id = uid;
+  -- security definer bypasses RLS, so enforce that callers can only bump
+  -- their own counter — otherwise any signed-in user could inflate anyone's.
+  update public.profiles set reunited_count = reunited_count + 1
+  where id = uid and id = auth.uid();
 $$;
 
 -- ============================================================================

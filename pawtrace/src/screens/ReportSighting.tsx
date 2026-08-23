@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../context/AppStore';
 import { Button } from '../components/Button';
+import { LocationPicker } from '../components/LocationPicker';
 import { uploadPhoto } from '../data/petsService';
-import { getCurrentLocation, reverseGeocode } from '../lib/geolocation';
+import { getCurrentLocation, reverseGeocode, type Coords } from '../lib/geolocation';
 import type { NewSighting } from '../types';
 import './ReportSighting.css';
 
@@ -38,7 +39,7 @@ export function ReportSighting() {
   };
 
   // Capture the device's location and fill lat/lng + a friendly place label.
-  const useMyLocation = useCallback(async () => {
+  const captureLocation = useCallback(async () => {
     setLocStatus('loading');
     setLocMessage('Getting your location…');
     try {
@@ -56,13 +57,33 @@ export function ReportSighting() {
 
   // Try to grab location automatically when the screen opens (prompts for permission).
   useEffect(() => {
-    useMyLocation();
+    captureLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Picked spot shown on the mini map; coordinates live in the form state.
+  const pickedLocation: Coords | null =
+    form.lat && form.lng ? { lat: Number(form.lat), lng: Number(form.lng) } : null;
+
+  const onPickLocation = async ({ lat, lng }: Coords) => {
+    setForm(prev => ({ ...prev, lat: lat.toFixed(5), lng: lng.toFixed(5) }));
+    setLocStatus('done');
+    setLocMessage('Location pinned');
+    const label = await reverseGeocode(lat, lng);
+    if (label) {
+      setForm(prev => ({ ...prev, locationLabel: prev.locationLabel || label }));
+      setLocMessage(`Pinned · ${label}`);
+    }
+  };
 
   const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      showToast('That photo is too large — please pick one under 8 MB.');
+      e.target.value = '';
+      return;
+    }
     setPhotoFile(file);
     setForm(prev => ({ ...prev, photoUrl: URL.createObjectURL(file) }));
   };
@@ -81,11 +102,19 @@ export function ReportSighting() {
       if (photoFile) {
         photoUrl = await uploadPhoto(photoFile, currentUser.id);
       }
+      // The sighting record has no separate place field, so fold the location
+      // label into the note — otherwise "Where did you see them?" is silently lost.
+      const note = form.note.trim();
+      const place = form.locationLabel.trim();
+      const fullNote = [note, place && !note.toLowerCase().includes(place.toLowerCase()) ? `📍 ${place}` : '']
+        .filter(Boolean)
+        .join(' ') || undefined;
+
       const input: NewSighting = {
         petId,
         lat: Number(form.lat) || pet?.lastSeen.lat || 12.9716,
         lng: Number(form.lng) || pet?.lastSeen.lng || 77.5946,
-        note: form.note.trim() || undefined,
+        note: fullNote,
         photoUrl,
         reportedById: currentUser.id,
         reportedByName: currentUser.name,
@@ -157,7 +186,7 @@ export function ReportSighting() {
         <button
           type="button"
           className={`use-location-btn ${locStatus === 'done' ? 'use-location-done' : ''}`}
-          onClick={useMyLocation}
+          onClick={captureLocation}
           disabled={locStatus === 'loading'}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="18" height="18" aria-hidden="true">
@@ -172,6 +201,16 @@ export function ReportSighting() {
           </p>
         )}
 
+        <div className="field-group">
+          <span className="field-label t-label">Pin the spot</span>
+          <LocationPicker
+            value={pickedLocation}
+            onChange={onPickLocation}
+            defaultCenter={pet ? { lat: pet.lastSeen.lat, lng: pet.lastSeen.lng } : undefined}
+            height="220px"
+          />
+        </div>
+
         <TextField
           label="Where did you see them? (optional)"
           id="locationLabel"
@@ -179,11 +218,6 @@ export function ReportSighting() {
           value={form.locationLabel}
           onChange={set('locationLabel') as any}
         />
-
-        <div className="lat-lng-row">
-          <TextField label="Latitude" id="lat" type="number" step="0.00001" placeholder="12.9716" value={form.lat} onChange={set('lat') as any} />
-          <TextField label="Longitude" id="lng" type="number" step="0.00001" placeholder="77.5946" value={form.lng} onChange={set('lng') as any} />
-        </div>
 
         <input
           ref={fileInputRef}

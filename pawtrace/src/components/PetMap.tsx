@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import type { Pet } from '../types';
+import { timeAgo } from '../lib/time';
 import './PetMap.css';
 
 interface PetMapProps {
@@ -10,6 +11,8 @@ interface PetMapProps {
   onPinClick?: (pet: Pet) => void;
   height?: string;
   highlightId?: string;
+  /** Plot each sighting as a small dot with a trail to the last-seen pin. */
+  showSightings?: boolean;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -75,11 +78,11 @@ function createDivIcon(status: string, isHighlighted = false): L.DivIcon {
   });
 }
 
-export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', highlightId }: PetMapProps) {
+export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', highlightId, showSightings = false }: PetMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
-  const polylinesRef = useRef<L.Polyline[]>([]);
+  const overlaysRef = useRef<L.Layer[]>([]);
 
   const defaultCenter: [number, number] = center || [12.9716, 77.5946];
 
@@ -98,8 +101,17 @@ export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', h
       subdomains: 'abcd',
       maxZoom: 20,
     }).addTo(map);
+    // Without an explicit center, frame the actual reports instead of a fixed city.
+    if (!center && pets.length > 0) {
+      const points = pets.map(p => [p.lastSeen.lat, p.lastSeen.lng] as [number, number]);
+      if (showSightings) {
+        pets.forEach(p => p.sightings.forEach(s => points.push([s.lat, s.lng])));
+      }
+      map.fitBounds(L.latLngBounds(points), { padding: [48, 48], maxZoom: 15 });
+    }
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -107,9 +119,9 @@ export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', h
     if (!map) return;
 
     markersRef.current.forEach(m => m.remove());
-    polylinesRef.current.forEach(p => p.remove());
+    overlaysRef.current.forEach(o => o.remove());
     markersRef.current = [];
-    polylinesRef.current = [];
+    overlaysRef.current = [];
 
     pets.forEach(pet => {
       const isHighlighted = pet.id === highlightId;
@@ -123,8 +135,8 @@ export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', h
       marker.addTo(map);
       markersRef.current.push(marker);
 
-      // Draw paw-path trail for lost pets with sightings
-      if (pet.status === 'lost' && pet.sightings.length > 0) {
+      // Draw the sighting trail: always in sighting mode, else only for lost pets.
+      if ((showSightings || pet.status === 'lost') && pet.sightings.length > 0) {
         const points: [number, number][] = pet.sightings.map(s => [s.lat, s.lng]);
         points.push([pet.lastSeen.lat, pet.lastSeen.lng]);
         const polyline = L.polyline(points, {
@@ -134,10 +146,29 @@ export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', h
           opacity: 0.65,
         });
         polyline.addTo(map);
-        polylinesRef.current.push(polyline);
+        overlaysRef.current.push(polyline);
+      }
+
+      // Plot each sighting as a small dot where it actually happened.
+      if (showSightings) {
+        pet.sightings.forEach(s => {
+          const dot = L.circleMarker([s.lat, s.lng], {
+            radius: 7,
+            color: '#FFFFFF',
+            weight: 2,
+            fillColor: '#F2603C',
+            fillOpacity: 0.9,
+          });
+          dot.bindTooltip(
+            `${s.note ? s.note + ' · ' : ''}${timeAgo(s.at)}`,
+            { direction: 'top', offset: [0, -6] }
+          );
+          dot.addTo(map);
+          overlaysRef.current.push(dot);
+        });
       }
     });
-  }, [pets, onPinClick, highlightId]);
+  }, [pets, onPinClick, highlightId, showSightings]);
 
   return <div ref={containerRef} className="pet-map" style={{ height }} />;
 }

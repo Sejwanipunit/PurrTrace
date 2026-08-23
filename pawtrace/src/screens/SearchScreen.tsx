@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useAppStore } from '../context/AppStore';
 import { PetCard } from '../components/PetCard';
 import { Chip } from '../components/Chip';
-import type { Pet, PetStatus } from '../types';
+import { isFreshReport } from '../lib/time';
 import './SearchScreen.css';
 
 type FilterKey = 'all' | 'lost' | 'found' | 'searching' | 'reunited' | 'dogs' | 'cats';
@@ -23,7 +23,7 @@ export function SearchScreen() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
 
   const results = useMemo(() => {
-    let r = pets;
+    let r = pets.filter(p => isFreshReport(p.createdAt));
     if (activeFilter !== 'all') {
       if (activeFilter === 'dogs') r = r.filter(p => p.species === 'dog');
       else if (activeFilter === 'cats') r = r.filter(p => p.species === 'cat');

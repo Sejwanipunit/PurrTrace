@@ -5,7 +5,8 @@ import { PetCard } from '../components/PetCard';
 import { Chip } from '../components/Chip';
 import { AlertBanner } from '../components/AlertBanner';
 import { PawPath } from '../components/PawPath';
-import type { Pet, PetStatus, Species } from '../types';
+import type { Pet } from '../types';
+import { isFreshReport } from '../lib/time';
 import './HomeFeed.css';
 
 type FilterKey = 'all' | 'dogs' | 'cats' | '5km' | 'today';
@@ -19,37 +20,35 @@ const FILTERS: { key: FilterKey; label: string }[] = [
 ];
 
 function applyFilter(pets: Pet[], filter: FilterKey): Pet[] {
-  const now = Date.now();
   const todayStart = new Date().setHours(0, 0, 0, 0);
   switch (filter) {
     case 'dogs': return pets.filter(p => p.species === 'dog');
     case 'cats': return pets.filter(p => p.species === 'cat');
-    case '5km': return pets.filter(p => (p.distanceKm ?? 0) <= 5);
+    // Only pets with a known distance qualify — unknown distance must not pass a distance filter.
+    case '5km': return pets.filter(p => p.distanceKm != null && p.distanceKm <= 5);
     case 'today': return pets.filter(p => new Date(p.createdAt).getTime() >= todayStart);
     default: return pets;
   }
 }
 
 export function HomeFeed() {
-  const { pets, loading, error, currentUser } = useAppStore();
+  const { pets, loading, error, currentUser, shareLocation } = useAppStore();
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
-  const lostNearby = pets.find(p => p.status === 'lost' && (p.distanceKm ?? 99) < 1);
+  // Public feed only shows recent reports; owners still see theirs in Profile.
+  const freshPets = useMemo(() => pets.filter(p => isFreshReport(p.createdAt)), [pets]);
+
+  const lostNearby = freshPets.find(p => p.status === 'lost' && (p.distanceKm ?? 99) < 1);
 
   const filtered = useMemo(() => {
-    let result = applyFilter(pets, activeFilter);
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.breed?.toLowerCase().includes(q) ||
-        p.lastSeen.label.toLowerCase().includes(q)
-      );
+    const result = applyFilter(freshPets, activeFilter);
+    // Nearest first once distances are known; otherwise keep newest-first.
+    if (result.some(p => p.distanceKm != null)) {
+      return [...result].sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
     }
     return result;
-  }, [pets, activeFilter, searchQuery]);
+  }, [freshPets, activeFilter]);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -77,12 +76,13 @@ export function HomeFeed() {
             <circle cx="11" cy="11" r="8"/>
             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
+          {/* Acts as a shortcut to the dedicated search screen; typing happens there. */}
           <input
             type="search"
             placeholder="Search by name, breed, or area…"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            readOnly
             onFocus={() => navigate('/search')}
+            onClick={() => navigate('/search')}
             className="home-search-input"
             aria-label="Search pets"
           />
@@ -142,7 +142,9 @@ export function HomeFeed() {
             <p className="t-body-m" style={{ color: 'var(--bark-500)' }}>
               {activeFilter === 'all'
                 ? "That's good news. Be the first to help if something changes."
-                : 'Try a different filter to see more results.'}
+                : activeFilter === '5km' && !shareLocation
+                  ? 'Turn on "Share location" in your Profile to see pets near you.'
+                  : 'Try a different filter to see more results.'}
             </p>
           </div>
         )}

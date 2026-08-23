@@ -181,6 +181,66 @@ export async function addSighting(input: NewSighting): Promise<Sighting> {
   return sighting;
 }
 
+/** Update an existing report. Only fields present in the patch are changed. */
+export async function updatePet(id: string, patch: Partial<NewPet>): Promise<Pet | undefined> {
+  if (isSupabaseConfigured && supabase) {
+    const row: Record<string, unknown> = {};
+    if (patch.name !== undefined) row.name = patch.name;
+    if (patch.species !== undefined) row.species = patch.species;
+    if ('breed' in patch) row.breed = patch.breed ?? null;
+    if ('ageYears' in patch) row.age_years = patch.ageYears ?? null;
+    if (patch.status !== undefined) row.status = patch.status;
+    if ('photoUrl' in patch) row.photo_url = patch.photoUrl ?? null;
+    if ('description' in patch) row.description = patch.description ?? null;
+    if ('microchipId' in patch) row.microchip_id = patch.microchipId ?? null;
+    if (patch.lastSeen) {
+      row.last_seen_lat = patch.lastSeen.lat;
+      row.last_seen_lng = patch.lastSeen.lng;
+      row.last_seen_label = patch.lastSeen.label;
+      row.last_seen_at = patch.lastSeen.at;
+    }
+    const { data, error } = await supabase
+      .from('pets')
+      .update(row)
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) throw error;
+    return rowToPet(data, []);
+  }
+
+  await delay();
+  pets = pets.map(p =>
+    p.id === id
+      ? {
+          ...p,
+          name: patch.name ?? p.name,
+          species: patch.species ?? p.species,
+          breed: 'breed' in patch ? patch.breed : p.breed,
+          ageYears: 'ageYears' in patch ? patch.ageYears : p.ageYears,
+          status: patch.status ?? p.status,
+          photoUrl: 'photoUrl' in patch ? patch.photoUrl : p.photoUrl,
+          description: 'description' in patch ? patch.description : p.description,
+          microchipId: 'microchipId' in patch ? patch.microchipId : p.microchipId,
+          lastSeen: patch.lastSeen ?? p.lastSeen,
+        }
+      : p
+  );
+  return pets.find(p => p.id === id);
+}
+
+/** Delete a report (sightings cascade in the DB). */
+export async function deletePet(id: string): Promise<void> {
+  if (isSupabaseConfigured && supabase) {
+    const { error } = await supabase.from('pets').delete().eq('id', id);
+    if (error) throw error;
+    return;
+  }
+
+  await delay();
+  pets = pets.filter(p => p.id !== id);
+}
+
 export async function markReunited(id: string, ownerId?: string): Promise<Pet | undefined> {
   if (isSupabaseConfigured && supabase) {
     const { data, error } = await supabase

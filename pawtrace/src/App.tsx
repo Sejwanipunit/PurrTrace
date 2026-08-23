@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AppStore, useAppStore } from './context/AppStore';
 import { BottomNav } from './components/BottomNav';
@@ -27,8 +27,10 @@ function AppContent() {
         <Route path="/search" element={<SearchScreen />} />
         <Route path="/pet/:id" element={<PetDetail />} />
         <Route path="/report" element={<ReportLost />} />
+        <Route path="/edit/:id" element={<ReportLost />} />
         <Route path="/report-sighting/:id?" element={<ReportSighting />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />
       <Fab />

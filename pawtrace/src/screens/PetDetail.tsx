@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../context/AppStore';
 import { Badge } from '../components/Badge';
@@ -6,15 +6,16 @@ import { Button } from '../components/Button';
 import { JourneyTracker } from '../components/JourneyTracker';
 import { PetMap } from '../components/PetMap';
 import { PawPath } from '../components/PawPath';
-import type { Pet } from '../types';
 import { timeAgo, formatDate } from '../lib/time';
+import { sharePoster } from '../lib/poster';
 import './PetDetail.css';
 
 export function PetDetail() {
   const { id } = useParams<{ id: string }>();
-  const { pets, loading, error, markReunited, showToast, currentUser } = useAppStore();
+  const { pets, loading, markReunited, deletePet, showToast, currentUser } = useAppStore();
   const navigate = useNavigate();
   const [showContact, setShowContact] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   const pet = pets.find(p => p.id === id);
 
@@ -34,7 +35,7 @@ export function PetDetail() {
     );
   }
 
-  if (!pet || error) {
+  if (!pet) {
     return (
       <div className="pet-detail screen-content">
         <div className="detail-error">
@@ -57,9 +58,35 @@ export function PetDetail() {
     );
   }
 
+  const isOwner = pet.reportedById === currentUser.id;
+
   const handleReunited = async () => {
     await markReunited(pet.id);
     showToast('Reunited 🎉');
+  };
+
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const outcome = await sharePoster(pet);
+      if (outcome === 'shared') showToast('Thanks for spreading the word! 🐾');
+      if (outcome === 'downloaded') showToast('Poster saved — share it anywhere!');
+    } catch {
+      showToast('Couldn’t create the poster — please try again.');
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Delete ${pet.name}'s report? This also removes all sightings and can't be undone.`)) return;
+    try {
+      await deletePet(pet.id);
+      showToast('Report deleted');
+      navigate('/', { replace: true });
+    } catch {
+      showToast('Couldn’t delete the report — please try again.');
+    }
   };
 
   return (
@@ -89,12 +116,31 @@ export function PetDetail() {
               {pet.breed}{pet.ageYears ? `, ${pet.ageYears} year${pet.ageYears !== 1 ? 's' : ''} old` : ''}
             </p>}
           </div>
-          {pet.status !== 'reunited' && pet.reportedById === currentUser.id && (
+          {pet.status !== 'reunited' && isOwner && (
             <Button variant="secondary" onClick={handleReunited} aria-label="Mark as reunited">
               Mark reunited
             </Button>
           )}
         </div>
+
+        {/* Owner tools */}
+        {isOwner && (
+          <div className="owner-tools">
+            <button className="owner-tool-btn" onClick={() => navigate(`/edit/${pet.id}`)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="16" height="16" aria-hidden="true">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/>
+              </svg>
+              Edit report
+            </button>
+            <button className="owner-tool-btn owner-tool-danger" onClick={handleDelete}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="16" height="16" aria-hidden="true">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              Delete
+            </button>
+          </div>
+        )}
 
         <PawPath count={5} />
 
@@ -136,11 +182,14 @@ export function PetDetail() {
 
         {/* Mini map */}
         <section aria-labelledby="map-label">
-          <h2 className="t-title section-label" id="map-label">Last seen location</h2>
+          <h2 className="t-title section-label" id="map-label">
+            {pet.sightings.length > 0 ? 'Last seen & sightings' : 'Last seen location'}
+          </h2>
           <div className="detail-map-wrap">
             <PetMap
               pets={[pet]}
-              center={[pet.lastSeen.lat, pet.lastSeen.lng]}
+              showSightings
+              center={pet.sightings.length > 0 ? undefined : [pet.lastSeen.lat, pet.lastSeen.lng]}
               zoom={15}
               height="180px"
             />
@@ -161,6 +210,7 @@ export function PetDetail() {
                   <div>
                     <p className="t-body-m" style={{ fontWeight: 700 }}>{s.reportedBy}</p>
                     {s.note && <p className="t-body-s" style={{ color: 'var(--bark-700)' }}>{s.note}</p>}
+                    {s.photoUrl && <img src={s.photoUrl} alt={`Sighting of ${pet.name}`} className="sighting-photo" loading="lazy" />}
                     <p className="t-mono" style={{ color: 'var(--bark-500)', marginTop: 2 }}>{timeAgo(s.at)}</p>
                   </div>
                 </div>
@@ -176,13 +226,17 @@ export function PetDetail() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" width="18" height="18" aria-hidden="true">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.7 16z"/>
               </svg>
-              Show owner contact
+              Contact the owner
             </button>
           ) : (
             <div className="contact-revealed">
-              <p className="t-body-m" style={{ color: 'var(--bark-500)' }}>Contact owner</p>
-              <a href="tel:+919876543210" className="t-title contact-number">+91 98765 43210</a>
-              <p className="t-body-s" style={{ color: 'var(--bark-500)' }}>Reported by {pet.reportedBy}</p>
+              <p className="t-body-m" style={{ color: 'var(--bark-500)' }}>Reported by</p>
+              <p className="t-title contact-number">{pet.reportedBy}</p>
+              <p className="t-body-s" style={{ color: 'var(--bark-500)' }}>
+                {pet.status === 'reunited'
+                  ? `${pet.name} is already back home — no action needed.`
+                  : `Report a sighting below and ${pet.reportedBy} is notified instantly.`}
+              </p>
             </div>
           )}
         </section>
@@ -198,6 +252,15 @@ export function PetDetail() {
             </button>
           </div>
         )}
+
+        {/* Share poster */}
+        <Button variant="secondary" fullWidth onClick={handleShare} disabled={sharing}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="17" height="17" aria-hidden="true" style={{ marginRight: 8, verticalAlign: '-3px' }}>
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/>
+          </svg>
+          {sharing ? 'Preparing poster…' : `Share ${pet.name}’s poster`}
+        </Button>
 
         {pet.status === 'reunited' && (
           <div className="reunited-banner">

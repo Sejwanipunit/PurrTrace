@@ -8,6 +8,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['paw-icon.svg'],
+      workbox: {
+        // Pull the Web Push handlers into the generated service worker.
+        importScripts: ['push-sw.js'],
+      },
       manifest: {
         name: 'PawTrace',
         short_name: 'PawTrace',

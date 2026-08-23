@@ -225,3 +225,46 @@
 @media (prefers-reduced-motion: reduce) {
   .detail-hero-skeleton, .skeleton-text { animation: none; }
 }
+
+/* Owner tools (edit / delete own report) */
+.owner-tools {
+  display: flex;
+  gap: var(--s-sm);
+}
+
+.owner-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--bark-700);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.owner-tool-btn:hover {
+  background: var(--sprout-50);
+  border-color: var(--sprout-300);
+  color: var(--sprout-700);
+}
+
+.owner-tool-danger:hover {
+  background: var(--coral-50);
+  border-color: var(--coral-300);
+  color: var(--coral-700);
+}
+
+/* Sighting photos in the timeline */
+.sighting-photo {
+  margin-top: 6px;
+  width: 100%;
+  max-width: 220px;
+  border-radius: var(--r-md);
+  display: block;
+}

@@ -19,7 +19,8 @@ export function notify(title: string, body: string, onClick?: () => void): void 
       body,
       icon: '/paw-icon.svg',
       badge: '/paw-icon.svg',
-      tag: 'pawtrace',
+      // Unique tag so a new alert never silently replaces an unread one.
+      tag: `pawtrace-${Date.now()}`,
     });
     if (onClick) {
       n.onclick = () => {

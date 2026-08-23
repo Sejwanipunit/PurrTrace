@@ -5,7 +5,7 @@ import { PetMap } from '../components/PetMap';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import type { Pet } from '../types';
-import { timeAgo } from '../lib/time';
+import { timeAgo, isFreshReport } from '../lib/time';
 import './MapScreen.css';
 
 export function MapScreen() {
@@ -13,7 +13,7 @@ export function MapScreen() {
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const navigate = useNavigate();
 
-  const activePets = pets.filter(p => p.status !== 'reunited');
+  const activePets = pets.filter(p => p.status !== 'reunited' && isFreshReport(p.createdAt));
 
   return (
     <div className="map-screen">
@@ -32,7 +32,6 @@ export function MapScreen() {
       ) : (
         <PetMap
           pets={activePets}
-          center={[12.9716, 77.5946]}
           zoom={14}
           height="calc(100vh - 160px)"
           onPinClick={setSelectedPet}
