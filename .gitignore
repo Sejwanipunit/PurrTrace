@@ -12,3 +12,7 @@ dist/
 # Env / secrets — never commit these
 .env
 .env.local
+
+# Supabase CLI local cache
+supabase/.temp/
+.temp/

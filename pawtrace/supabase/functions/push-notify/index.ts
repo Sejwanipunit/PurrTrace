@@ -9,20 +9,35 @@
 // (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided automatically.)
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import webpush from 'npm:web-push@3.6.7';
 
 const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY') ?? '';
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY') ?? '';
 const WEBHOOK_SECRET = Deno.env.get('PUSH_WEBHOOK_SECRET') ?? '';
-
-webpush.setVapidDetails('mailto:admin@pawtrace.app', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
-// Keep in sync with NEARBY_RADIUS_KM / REPORT_TTL_DAYS in the app.
+// web-push is loaded lazily inside the handler so any load/config error is
+// caught and reported in the response, instead of crashing the whole worker
+// at boot (which surfaces only as an opaque WORKER_ERROR / 500).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let webpush: any = null;
+let initError = '';
+async function initWebpush(): Promise<boolean> {
+  if (webpush) return true;
+  try {
+    const mod = await import('npm:web-push@3.6.7');
+    webpush = mod.default ?? mod;
+    webpush.setVapidDetails('mailto:admin@pawtrace.app', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+    return true;
+  } catch (e) {
+    initError = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    return false;
+  }
+}
+
 const NEARBY_RADIUS_KM = 3;
 const REPORT_TTL_DAYS = 30;
 
@@ -61,7 +76,6 @@ async function sendToUsers(userIds: string[], payload: PushPayload): Promise<num
         );
         sent++;
       } catch (err) {
-        // Subscription expired or revoked — clean it up.
         const status = (err as { statusCode?: number }).statusCode;
         if (status === 404 || status === 410) {
           await supabase.from('push_subscriptions').delete().eq('endpoint', s.endpoint);
@@ -80,14 +94,23 @@ Deno.serve(async (req) => {
     return new Response('Forbidden', { status: 403 });
   }
 
-  const payload = await req.json();
+  // Lazy init — report a clear error if VAPID keys/library are misconfigured.
+  const ok = await initWebpush();
+  if (!ok) {
+    return Response.json(
+      { error: 'init_failed', detail: initError, pubKeyLen: VAPID_PUBLIC_KEY.length, privKeyLen: VAPID_PRIVATE_KEY.length },
+      { status: 500 }
+    );
+  }
+
+  const payload = await req.json().catch(() => null);
+  if (!payload) return Response.json({ sent: 0, note: 'no body' });
   const { type, table, record } = payload;
   if (type !== 'INSERT' || !record) return Response.json({ sent: 0 });
 
   let sent = 0;
 
   if (table === 'sightings') {
-    // Someone reported a sighting → notify the pet's owner.
     const { data: pet } = await supabase
       .from('pets')
       .select('id, name, reported_by')
@@ -101,7 +124,6 @@ Deno.serve(async (req) => {
       });
     }
   } else if (table === 'pets' && record.status === 'found') {
-    // Someone reported a FOUND pet → notify owners of nearby active lost pets.
     const cutoff = new Date(Date.now() - REPORT_TTL_DAYS * 86400000).toISOString();
     const { data: lostPets } = await supabase
       .from('pets')
@@ -110,7 +132,7 @@ Deno.serve(async (req) => {
       .gte('created_at', cutoff)
       .not('reported_by', 'is', null);
 
-    const owners = new Map<string, string>(); // owner id → their pet's name
+    const owners = new Map<string, string>();
     for (const lost of lostPets ?? []) {
       if (lost.reported_by === record.reported_by) continue;
       const dist = haversine(record.last_seen_lat, record.last_seen_lng, lost.last_seen_lat, lost.last_seen_lng);
