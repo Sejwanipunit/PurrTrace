@@ -152,3 +152,44 @@ Devices subscribe automatically after sign-in once notification permission is gr
   - `sightings` INSERT → notifies the pet's owner (unless they reported it themselves).
   - `pets` INSERT with status `found` → notifies owners of active lost pets within 3 km.
 - While a tab is open with push active, in-app duplicate notifications are suppressed.
+
+---
+
+## AI features (Claude vision) — photo auto-tagging & match suggestions
+
+PawTrace uses **Claude** (via a secure Supabase Edge Function, `pet-ai`) for two features:
+
+- **Photo auto-tagging** — in the report flow, "✨ Detect details with AI" reads the uploaded
+  photo and fills species / breed / colour / markings / a draft description.
+- **AI possible matches** — on an active pet's page, "Find possible matches" compares its photo
+  against nearby opposite-status pets of the same species and ranks likely matches with a
+  confidence score + reasoning.
+
+The Anthropic API key lives only in the Edge Function (never in the client), and the function
+requires a signed-in Supabase user, so the key can't be abused anonymously. Without a key the app
+still runs — the client falls back to a demo stub.
+
+### Setup
+
+1. Get an Anthropic API key from <https://console.anthropic.com> → **API Keys**.
+2. Deploy the function and set the key:
+
+   ```bash
+   supabase functions deploy pet-ai --no-verify-jwt
+   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+   ```
+
+3. (Optional) Pick a cheaper model — the function defaults to `claude-opus-5`:
+
+   ```bash
+   supabase secrets set AI_MODEL=claude-haiku-4-5
+   ```
+
+No frontend env var is needed — the client calls the function through the signed-in session.
+
+### How it fits together
+
+- `src/lib/petAI.ts` — client helpers (`describePetPhoto`, `findPossibleMatches`) that invoke the
+  Edge Function; demo stubs when Supabase isn't configured.
+- `supabase/functions/pet-ai/index.ts` — verifies the caller's Supabase session, then calls the
+  Claude Messages API with the image(s) and returns structured JSON.

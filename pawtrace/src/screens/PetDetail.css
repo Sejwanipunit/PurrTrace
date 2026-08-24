@@ -344,3 +344,77 @@
 @media (prefers-reduced-motion: reduce) {
   .poster-modal { animation: none; }
 }
+
+/* AI possible matches */
+.match-section { display: flex; flex-direction: column; gap: var(--s-sm); }
+.match-section .ai-spark { font-size: 18px; }
+
+.match-cta-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-md);
+  text-align: center;
+  background: linear-gradient(120deg, var(--lagoon-50), var(--sprout-50));
+  border: 1.5px solid var(--lagoon-100);
+  border-radius: var(--r-lg);
+  padding: var(--s-lg);
+}
+
+.match-spinner {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--lagoon-100);
+  border-top-color: var(--lagoon-500);
+  animation: match-spin 0.8s linear infinite;
+}
+@keyframes match-spin { to { transform: rotate(360deg); } }
+
+.match-card {
+  display: flex;
+  gap: var(--s-md);
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-md);
+  box-shadow: var(--sh-1);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s;
+}
+.match-card:hover { transform: translateY(-2px); box-shadow: var(--sh-2); }
+.match-card:active { transform: scale(0.99); }
+
+.match-thumb {
+  width: 64px; height: 64px;
+  border-radius: var(--r-md);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.match-body { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.match-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-sm); }
+
+.match-badge {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+.match-badge.match-high { background: var(--sprout-100); color: var(--sprout-700); }
+.match-badge.match-mid { background: var(--sun-100); color: var(--sun-700); }
+.match-badge.match-low { background: var(--sand); color: var(--bark-700); }
+
+.match-bar { height: 6px; border-radius: 3px; background: var(--sand); overflow: hidden; }
+.match-bar-fill { display: block; height: 100%; border-radius: 3px; }
+.match-bar-fill.match-high { background: var(--sprout-500); }
+.match-bar-fill.match-mid { background: var(--sun-400); }
+.match-bar-fill.match-low { background: var(--bark-300); }
+
+.match-disclaimer { color: var(--bark-500); text-align: center; padding-top: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .match-spinner { animation-duration: 2s; }
+  .match-card { transition: none; }
+}

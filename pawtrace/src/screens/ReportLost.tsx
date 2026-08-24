@@ -6,6 +6,7 @@ import { PawIcon } from '../components/PawPath';
 import { LocationPicker } from '../components/LocationPicker';
 import { uploadPhoto } from '../data/petsService';
 import { getCurrentLocation, reverseGeocode, geocodeLabel, type Coords } from '../lib/geolocation';
+import { describePetPhoto } from '../lib/petAI';
 import type { NewPet, Species } from '../types';
 import './ReportLost.css';
 
@@ -118,6 +119,33 @@ export function ReportLost() {
 
   const [locStatus, setLocStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [locMessage, setLocMessage] = useState('');
+
+  const [aiStatus, setAiStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [aiMessage, setAiMessage] = useState('');
+
+  // Feature: detect species/breed/description from the photo with Claude vision.
+  const detectFromPhoto = async () => {
+    if (!photoFile) return;
+    setAiStatus('loading');
+    setAiMessage('Looking at the photo…');
+    try {
+      const d = await describePetPhoto(photoFile);
+      if (!d) throw new Error('No result');
+      setForm(prev => ({
+        ...prev,
+        species: prev.species || d.species,
+        breed: prev.breed || d.breed,
+        description: prev.description || d.description,
+      }));
+      setErrors(prev => { const n = { ...prev }; delete n.species; return n; });
+      const bits = [d.breed, d.color, d.markings].filter(Boolean).join(' · ');
+      setAiStatus('done');
+      setAiMessage(bits ? `Detected: ${bits}` : 'Details filled from photo');
+    } catch {
+      setAiStatus('error');
+      setAiMessage('Couldn’t read the photo — fill the details in yourself.');
+    }
+  };
 
   // ----- Edit mode (/edit/:id): prefill from the existing report -----
   const { id: editId } = useParams<{ id: string }>();
@@ -340,6 +368,25 @@ export function ReportLost() {
                 </button>
               )}
             </div>
+
+            {photoFile && (
+              <>
+                <button
+                  type="button"
+                  className={`ai-detect-btn ${aiStatus === 'done' ? 'ai-detect-done' : ''}`}
+                  onClick={detectFromPhoto}
+                  disabled={aiStatus === 'loading'}
+                >
+                  <span className="ai-spark" aria-hidden="true">✨</span>
+                  {aiStatus === 'loading' ? 'Reading photo…' : aiStatus === 'done' ? 'Details filled — tap to redo' : 'Detect details with AI'}
+                </button>
+                {aiMessage && (
+                  <p className={`ai-status t-body-s ${aiStatus === 'error' ? 'ai-status-error' : ''}`} role="status">
+                    {aiMessage}
+                  </p>
+                )}
+              </>
+            )}
 
             <TextField
               label="Or paste a photo URL (optional)"

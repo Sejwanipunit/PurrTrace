@@ -8,6 +8,7 @@ import { PetMap } from '../components/PetMap';
 import { PawPath } from '../components/PawPath';
 import { timeAgo, formatDate } from '../lib/time';
 import { generatePoster, sharePosterBlob, downloadPosterBlob, canSharePoster } from '../lib/poster';
+import { findPossibleMatches, candidatesFor, type PetMatch } from '../lib/petAI';
 import './PetDetail.css';
 
 export function PetDetail() {
@@ -18,6 +19,8 @@ export function PetDetail() {
   const [sharing, setSharing] = useState(false);
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const [posterBlob, setPosterBlob] = useState<Blob | null>(null);
+  const [matchStatus, setMatchStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [matches, setMatches] = useState<PetMatch[]>([]);
 
   const pet = pets.find(p => p.id === id);
 
@@ -100,6 +103,23 @@ export function PetDetail() {
     showToast('Poster saved — share it anywhere!');
     closePoster();
   };
+
+  const matchCandidates = candidatesFor(pet, pets);
+  const runMatch = async () => {
+    if (!pet.photoUrl) return;
+    setMatchStatus('loading');
+    try {
+      const result = await findPossibleMatches(
+        { imageUrl: pet.photoUrl, name: pet.name, species: pet.species, breed: pet.breed },
+        matchCandidates.map(c => ({ id: c.id, imageUrl: c.photoUrl!, name: c.name, species: c.species, breed: c.breed }))
+      );
+      setMatches(result);
+      setMatchStatus('done');
+    } catch {
+      setMatchStatus('error');
+    }
+  };
+  const matchSideLabel = pet.status === 'found' ? 'lost' : 'found';
 
   const handleDelete = async () => {
     if (!window.confirm(`Delete ${pet.name}'s report? This also removes all sightings and can't be undone.`)) return;
@@ -185,6 +205,66 @@ export function PetDetail() {
           <h2 className="t-title section-label" id="journey-label">Journey</h2>
           <JourneyTracker status={pet.status} createdAt={pet.createdAt} sightingCount={pet.sightings.length} />
         </section>
+
+        {/* AI possible matches — only for active reports with a photo and candidates to compare */}
+        {pet.status !== 'reunited' && pet.photoUrl && matchCandidates.length > 0 && (
+          <section aria-labelledby="match-label" className="match-section">
+            <h2 className="t-title section-label" id="match-label">
+              <span className="ai-spark" aria-hidden="true">✨</span> AI possible matches
+            </h2>
+
+            {matchStatus === 'idle' && (
+              <div className="match-cta-box">
+                <p className="t-body-m" style={{ color: 'var(--bark-700)' }}>
+                  Compare {pet.name}’s photo against {matchCandidates.length} nearby {matchSideLabel} {matchCandidates.length === 1 ? 'pet' : 'pets'} using AI vision.
+                </p>
+                <Button variant="secondary" fullWidth onClick={runMatch}>Find possible matches</Button>
+              </div>
+            )}
+
+            {matchStatus === 'loading' && (
+              <div className="match-cta-box">
+                <div className="match-spinner" aria-hidden="true" />
+                <p className="t-body-m" style={{ color: 'var(--bark-500)' }}>Comparing photos with AI…</p>
+              </div>
+            )}
+
+            {matchStatus === 'error' && (
+              <div className="match-cta-box">
+                <p className="t-body-m" style={{ color: 'var(--coral-700)' }}>Couldn’t run matching just now.</p>
+                <Button variant="secondary" fullWidth onClick={runMatch}>Try again</Button>
+              </div>
+            )}
+
+            {matchStatus === 'done' && matches.length === 0 && (
+              <div className="match-cta-box">
+                <p className="t-body-m" style={{ color: 'var(--bark-500)' }}>
+                  No strong matches among nearby {matchSideLabel} pets — that can change as new reports come in.
+                </p>
+              </div>
+            )}
+
+            {matchStatus === 'done' && matches.map(m => {
+              const cand = pets.find(p => p.id === m.id);
+              if (!cand) return null;
+              const level = m.confidence >= 70 ? 'high' : m.confidence >= 50 ? 'mid' : 'low';
+              return (
+                <button key={m.id} className="match-card" onClick={() => navigate(`/pet/${cand.id}`)}>
+                  {cand.photoUrl && <img src={cand.photoUrl} alt={cand.name} className="match-thumb" />}
+                  <div className="match-body">
+                    <div className="match-head">
+                      <span className="t-body-l" style={{ fontWeight: 800 }}>{cand.name}</span>
+                      <span className={`match-badge match-${level}`}>{Math.round(m.confidence)}% match</span>
+                    </div>
+                    <div className="match-bar"><span className={`match-bar-fill match-${level}`} style={{ width: `${Math.min(100, Math.max(6, m.confidence))}%` }} /></div>
+                    <p className="t-body-s" style={{ color: 'var(--bark-700)' }}>{m.reasoning}</p>
+                  </div>
+                </button>
+              );
+            })}
+            <p className="t-body-s match-disclaimer">AI suggestions — always confirm in person before reuniting.</p>
+          </section>
+        )}
 
         {/* Description */}
         {pet.description && (
