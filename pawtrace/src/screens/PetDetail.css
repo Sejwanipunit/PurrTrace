@@ -284,3 +284,63 @@
 .reward-banner > div { display: flex; flex-direction: column; }
 .reward-label { color: var(--bark-500); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
 .reward-amount { color: var(--bark-900); font-family: 'Fredoka', sans-serif; }
+
+/* Poster preview modal */
+.poster-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(42, 39, 31, 0.66);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+  animation: poster-fade 0.2s ease;
+}
+@keyframes poster-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.poster-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-md);
+}
+
+.poster-preview-img {
+  width: 100%;
+  height: auto;
+  max-height: calc(100vh - 200px);
+  object-fit: contain;
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-3);
+}
+
+.poster-modal-actions {
+  display: flex;
+  gap: var(--s-sm);
+}
+.poster-modal-actions .btn { flex: 1; }
+
+.poster-close {
+  position: absolute;
+  top: -14px;
+  right: -6px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--bark-700);
+  font-size: 26px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--sh-2);
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poster-modal { animation: none; }
+}

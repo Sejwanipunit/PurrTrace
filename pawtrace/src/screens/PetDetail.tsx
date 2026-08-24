@@ -7,7 +7,7 @@ import { JourneyTracker } from '../components/JourneyTracker';
 import { PetMap } from '../components/PetMap';
 import { PawPath } from '../components/PawPath';
 import { timeAgo, formatDate } from '../lib/time';
-import { sharePoster } from '../lib/poster';
+import { generatePoster, sharePosterBlob, downloadPosterBlob, canSharePoster } from '../lib/poster';
 import './PetDetail.css';
 
 export function PetDetail() {
@@ -16,6 +16,8 @@ export function PetDetail() {
   const navigate = useNavigate();
   const [showContact, setShowContact] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  const [posterBlob, setPosterBlob] = useState<Blob | null>(null);
 
   const pet = pets.find(p => p.id === id);
 
@@ -65,17 +67,38 @@ export function PetDetail() {
     showToast('Reunited 🎉');
   };
 
+  // Build the poster and open the preview modal.
   const handleShare = async () => {
     setSharing(true);
     try {
-      const outcome = await sharePoster(pet);
-      if (outcome === 'shared') showToast('Thanks for spreading the word! 🐾');
-      if (outcome === 'downloaded') showToast('Poster saved — share it anywhere!');
+      const blob = await generatePoster(pet);
+      setPosterBlob(blob);
+      setPosterUrl(URL.createObjectURL(blob));
     } catch {
       showToast('Couldn’t create the poster — please try again.');
     } finally {
       setSharing(false);
     }
+  };
+
+  const closePoster = () => {
+    if (posterUrl) URL.revokeObjectURL(posterUrl);
+    setPosterUrl(null);
+    setPosterBlob(null);
+  };
+
+  const handlePosterShare = async () => {
+    if (!posterBlob) return;
+    const outcome = await sharePosterBlob(pet, posterBlob);
+    if (outcome === 'shared') { showToast('Thanks for spreading the word! 🐾'); closePoster(); }
+    if (outcome === 'downloaded') { showToast('Poster saved — share it anywhere!'); closePoster(); }
+  };
+
+  const handlePosterDownload = () => {
+    if (!posterBlob) return;
+    downloadPosterBlob(pet, posterBlob);
+    showToast('Poster saved — share it anywhere!');
+    closePoster();
   };
 
   const handleDelete = async () => {
@@ -272,7 +295,7 @@ export function PetDetail() {
             <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
             <line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/>
           </svg>
-          {sharing ? 'Preparing poster…' : `Share ${pet.name}’s poster`}
+          {sharing ? 'Preparing poster…' : `See ${pet.name}’s poster`}
         </Button>
 
         {pet.status === 'reunited' && (
@@ -287,6 +310,32 @@ export function PetDetail() {
           </div>
         )}
       </div>
+
+      {posterUrl && (
+        <div className="poster-modal" role="dialog" aria-modal="true" aria-label={`${pet.name}'s poster`} onClick={closePoster}>
+          <div className="poster-modal-card" onClick={e => e.stopPropagation()}>
+            <button className="poster-close" onClick={closePoster} aria-label="Close preview">×</button>
+            <img src={posterUrl} alt={`Shareable poster for ${pet.name}`} className="poster-preview-img" />
+            <div className="poster-modal-actions">
+              {canSharePoster() && (
+                <Button variant="primary" fullWidth onClick={handlePosterShare}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="17" height="17" aria-hidden="true" style={{ marginRight: 8, verticalAlign: '-3px' }}>
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/>
+                  </svg>
+                  Share
+                </Button>
+              )}
+              <Button variant="secondary" fullWidth onClick={handlePosterDownload}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="17" height="17" aria-hidden="true" style={{ marginRight: 8, verticalAlign: '-3px' }}>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Download
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

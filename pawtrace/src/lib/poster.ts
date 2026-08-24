@@ -304,12 +304,32 @@ export async function generatePoster(pet: Pet): Promise<Blob> {
 
 export type ShareOutcome = 'shared' | 'downloaded' | 'cancelled';
 
-/** Share the poster via the Web Share API, falling back to a PNG download. */
-export async function sharePoster(pet: Pet): Promise<ShareOutcome> {
+function posterFilename(pet: Pet): string {
+  return `pawtrace-${pet.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+}
+
+/** Whether the device can share files via the native share sheet. */
+export function canSharePoster(): boolean {
+  return typeof navigator !== 'undefined'
+    && !!navigator.canShare
+    && navigator.canShare({ files: [new File([], 'x.png', { type: 'image/png' })] });
+}
+
+/** Trigger a PNG download of an already-generated poster blob. */
+export function downloadPosterBlob(pet: Pet, blob: Blob): void {
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = objectUrl;
+  a.download = posterFilename(pet);
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
+}
+
+/** Share an already-generated poster blob via the Web Share API, else download it. */
+export async function sharePosterBlob(pet: Pet, blob: Blob): Promise<ShareOutcome> {
   const url = `${window.location.origin}/pet/${pet.id}`;
   const title = pet.status === 'reunited' ? `${pet.name} is back home!` : `Help find ${pet.name}`;
-  const blob = await generatePoster(pet);
-  const file = new File([blob], `pawtrace-${pet.name.toLowerCase().replace(/\s+/g, '-')}.png`, { type: 'image/png' });
+  const file = new File([blob], posterFilename(pet), { type: 'image/png' });
 
   try {
     if (navigator.canShare?.({ files: [file] })) {
@@ -325,11 +345,12 @@ export async function sharePoster(pet: Pet): Promise<ShareOutcome> {
     // Otherwise fall through to download.
   }
 
-  const objectUrl = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = objectUrl;
-  a.download = file.name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
+  downloadPosterBlob(pet, blob);
   return 'downloaded';
+}
+
+/** Generate + share in one call (no preview). Kept for convenience. */
+export async function sharePoster(pet: Pet): Promise<ShareOutcome> {
+  const blob = await generatePoster(pet);
+  return sharePosterBlob(pet, blob);
 }
