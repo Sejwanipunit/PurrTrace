@@ -155,41 +155,40 @@ Devices subscribe automatically after sign-in once notification permission is gr
 
 ---
 
-## AI features (Claude vision) — photo auto-tagging & match suggestions
+## AI features (on-device) — photo auto-tagging & match suggestions
 
-PawTrace uses **Claude** (via a secure Supabase Edge Function, `pet-ai`) for two features:
+PawTrace runs two AI features **entirely in the browser** with TensorFlow.js + MobileNet — no API
+keys, no tokens, no backend, no per-use cost. **There is nothing to set up**; it just works once
+deployed.
 
-- **Photo auto-tagging** — in the report flow, "✨ Detect details with AI" reads the uploaded
-  photo and fills species / breed / colour / markings / a draft description.
-- **AI possible matches** — on an active pet's page, "Find possible matches" compares its photo
-  against nearby opposite-status pets of the same species and ranks likely matches with a
-  confidence score + reasoning.
+- **Photo auto-tagging** — in the report flow, "✨ Detect details with AI" classifies the uploaded
+  photo (MobileNet → ImageNet labels) to fill species / breed, plus a dominant-colour estimate and
+  a draft description.
+- **AI possible matches** — on an active pet's page, "Find possible matches" computes a MobileNet
+  **image embedding** for the pet and each nearby opposite-status same-species candidate, then ranks
+  them by **cosine similarity** with a confidence score.
 
-The Anthropic API key lives only in the Edge Function (never in the client), and the function
-requires a signed-in Supabase user, so the key can't be abused anonymously. Without a key the app
-still runs — the client falls back to a demo stub.
+### How it works
 
-### Setup
+- `src/lib/petVision.ts` — lazily loads TF.js + MobileNet from a CDN (cached by the browser after
+  first use), and exposes `classify`, `embed`, `cosineSimilarity`, and `dominantColor`. Everything
+  runs on the user's device; no image ever leaves the browser for AI.
+- `src/lib/petAI.ts` — `describePetPhoto` (classification → species/breed/colour) and
+  `findPossibleMatches` (embeddings → cosine similarity → ranked matches).
 
-1. Get an Anthropic API key from <https://console.anthropic.com> → **API Keys**.
-2. Deploy the function and set the key:
+> **Note:** TF.js is loaded via CDN `<script>` rather than an npm import because Vite's dev bundler
+> mis-handles the tfjs package. The model weights (~16 MB) download once from Google's CDN and are
+> cached; matching/tagging then run locally in ~1–2s.
 
-   ```bash
-   supabase functions deploy pet-ai --no-verify-jwt
-   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
-   ```
+### Optional: higher-accuracy matching with Claude vision
 
-3. (Optional) Pick a cheaper model — the function defaults to `claude-opus-5`:
+The repo also includes `supabase/functions/pet-ai/index.ts` — a Supabase Edge Function that does the
+same two tasks with **Claude vision** (better breed detection and human-readable match reasoning). It
+is **not used by default** (it costs Anthropic API tokens). To switch to it, point `src/lib/petAI.ts`
+at the function (`supabase.functions.invoke('pet-ai', …)`), then:
 
-   ```bash
-   supabase secrets set AI_MODEL=claude-haiku-4-5
-   ```
-
-No frontend env var is needed — the client calls the function through the signed-in session.
-
-### How it fits together
-
-- `src/lib/petAI.ts` — client helpers (`describePetPhoto`, `findPossibleMatches`) that invoke the
-  Edge Function; demo stubs when Supabase isn't configured.
-- `supabase/functions/pet-ai/index.ts` — verifies the caller's Supabase session, then calls the
-  Claude Messages API with the image(s) and returns structured JSON.
+```bash
+supabase functions deploy pet-ai --no-verify-jwt
+supabase secrets set ANTHROPIC_API_KEY=sk-ant-...      # from console.anthropic.com
+supabase secrets set AI_MODEL=claude-haiku-4-5         # optional, cheaper than the default
+```
