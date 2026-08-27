@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../context/AppStore';
 import { Badge } from '../components/Badge';
@@ -9,6 +9,7 @@ import { PawPath } from '../components/PawPath';
 import { timeAgo, formatDate } from '../lib/time';
 import { generatePoster, sharePosterBlob, downloadPosterBlob, canSharePoster } from '../lib/poster';
 import { findPossibleMatches, candidatesFor, type PetMatch } from '../lib/petAI';
+import { reverseGeocode } from '../lib/geolocation';
 import './PetDetail.css';
 
 // Map a colour name to a CSS swatch colour for the attribute chip.
@@ -33,8 +34,32 @@ export function PetDetail() {
   const [posterBlob, setPosterBlob] = useState<Blob | null>(null);
   const [matchStatus, setMatchStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [matches, setMatches] = useState<PetMatch[]>([]);
+  const [mapFocus, setMapFocus] = useState<[number, number] | null>(null);
+  const [sightingPlaces, setSightingPlaces] = useState<Record<string, string>>({});
+  const mapSectionRef = useRef<HTMLDivElement>(null);
 
   const pet = pets.find(p => p.id === id);
+
+  // Reverse-geocode each sighting's coordinates into a friendly place label.
+  useEffect(() => {
+    if (!pet) return;
+    let cancelled = false;
+    (async () => {
+      for (const s of pet.sightings) {
+        if (sightingPlaces[s.id]) continue;
+        const label = await reverseGeocode(s.lat, s.lng);
+        if (cancelled) return;
+        if (label) setSightingPlaces(prev => ({ ...prev, [s.id]: label }));
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pet?.id, pet?.sightings.length]);
+
+  const focusSighting = (lat: number, lng: number) => {
+    setMapFocus([lat, lng]);
+    mapSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   if (loading) {
     return (
@@ -321,13 +346,14 @@ export function PetDetail() {
           <h2 className="t-title section-label" id="map-label">
             {pet.sightings.length > 0 ? 'Last seen & sightings' : 'Last seen location'}
           </h2>
-          <div className="detail-map-wrap">
+          <div className="detail-map-wrap" ref={mapSectionRef}>
             <PetMap
               pets={[pet]}
               showSightings
               center={pet.sightings.length > 0 ? undefined : [pet.lastSeen.lat, pet.lastSeen.lng]}
               zoom={15}
               height="180px"
+              focusCoord={mapFocus}
             />
             <div className="detail-coords t-mono">
               {pet.lastSeen.lat.toFixed(5)}, {pet.lastSeen.lng.toFixed(5)}
@@ -340,17 +366,39 @@ export function PetDetail() {
           <section aria-labelledby="sightings-label">
             <h2 className="t-title section-label" id="sightings-label">Sightings ({pet.sightings.length})</h2>
             <div className="sightings-list">
-              {pet.sightings.map(s => (
-                <div key={s.id} className="sighting-item">
-                  <div className="sighting-dot" />
-                  <div>
-                    <p className="t-body-m" style={{ fontWeight: 700 }}>{s.reportedBy}</p>
-                    {s.note && <p className="t-body-s" style={{ color: 'var(--bark-700)' }}>{s.note}</p>}
-                    {s.photoUrl && <img src={s.photoUrl} alt={`Sighting of ${pet.name}`} className="sighting-photo" loading="lazy" />}
-                    <p className="t-mono" style={{ color: 'var(--bark-500)', marginTop: 2 }}>{timeAgo(s.at)}</p>
+              {[...pet.sightings].sort((a, b) => +new Date(b.at) - +new Date(a.at)).map(s => {
+                const place = sightingPlaces[s.id];
+                return (
+                  <div key={s.id} className="sighting-item">
+                    <button className="sighting-main" onClick={() => focusSighting(s.lat, s.lng)} aria-label="Show this sighting on the map">
+                      <span className="sighting-dot" aria-hidden="true" />
+                      <span className="sighting-content">
+                        <span className="sighting-where t-body-m">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" width="14" height="14" aria-hidden="true">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                          </svg>
+                          {place || `${s.lat.toFixed(4)}, ${s.lng.toFixed(4)}`}
+                        </span>
+                        {s.note && <span className="t-body-s sighting-note">{s.note}</span>}
+                        {s.photoUrl && <img src={s.photoUrl} alt={`Sighting of ${pet.name}`} className="sighting-photo" loading="lazy" />}
+                        <span className="t-body-s sighting-meta">Spotted by {s.reportedBy} · {timeAgo(s.at)}</span>
+                      </span>
+                    </button>
+                    <a
+                      className="sighting-directions"
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="15" height="15" aria-hidden="true">
+                        <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                      </svg>
+                      Directions
+                    </a>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}

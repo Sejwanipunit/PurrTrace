@@ -13,6 +13,8 @@ interface PetMapProps {
   highlightId?: string;
   /** Plot each sighting as a small dot with a trail to the last-seen pin. */
   showSightings?: boolean;
+  /** When set/changed, pan+zoom the map to this point (e.g. a tapped sighting). */
+  focusCoord?: [number, number] | null;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -78,7 +80,7 @@ function createDivIcon(status: string, isHighlighted = false): L.DivIcon {
   });
 }
 
-export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', highlightId, showSightings = false }: PetMapProps) {
+export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', highlightId, showSightings = false, focusCoord }: PetMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
@@ -169,6 +171,12 @@ export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', h
       }
     });
   }, [pets, onPinClick, highlightId, showSightings]);
+
+  // Pan+zoom to a requested point (e.g. when a sighting row is tapped).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map && focusCoord) map.setView(focusCoord, 17, { animate: true });
+  }, [focusCoord]);
 
   return <div ref={containerRef} className="pet-map" style={{ height }} />;
 }
