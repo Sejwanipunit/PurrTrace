@@ -418,3 +418,31 @@
   .match-spinner { animation-duration: 2s; }
   .match-card { transition: none; }
 }
+
+/* Attribute chips under the pet name */
+.attr-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.attr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: var(--r-pill);
+  background: var(--sand);
+  border: 1px solid var(--border);
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--bark-700);
+}
+.attr-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(42, 39, 31, 0.15);
+  flex-shrink: 0;
+}

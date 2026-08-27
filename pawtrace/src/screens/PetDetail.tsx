@@ -11,6 +11,18 @@ import { generatePoster, sharePosterBlob, downloadPosterBlob, canSharePoster } f
 import { findPossibleMatches, candidatesFor, type PetMatch } from '../lib/petAI';
 import './PetDetail.css';
 
+// Map a colour name to a CSS swatch colour for the attribute chip.
+const COLOR_SWATCH: Record<string, string> = {
+  black: '#2A271F', white: '#F3F0E7', grey: '#9A9384', gray: '#9A9384',
+  brown: '#7A4E2C', tan: '#C8A06E', golden: '#D4AF5A', cream: '#EBDCB4',
+  ginger: '#C86E32', orange: '#DC8228',
+};
+function swatchFor(color: string): string {
+  const key = color.toLowerCase().split(/[\s&,]/)[0];
+  return COLOR_SWATCH[key] || 'var(--bark-300)';
+}
+const SPECIES_EMOJI: Record<string, string> = { dog: '🐶', cat: '🐱', other: '🐾' };
+
 export function PetDetail() {
   const { id } = useParams<{ id: string }>();
   const { pets, loading, markReunited, deletePet, showToast, currentUser } = useAppStore();
@@ -155,9 +167,17 @@ export function PetDetail() {
         <div className="detail-title-row">
           <div>
             <h1 className="t-headline">{pet.name}</h1>
-            {pet.breed && <p className="t-body-m" style={{ color: 'var(--bark-500)' }}>
-              {pet.breed}{pet.ageYears ? `, ${pet.ageYears} year${pet.ageYears !== 1 ? 's' : ''} old` : ''}
-            </p>}
+            <div className="attr-chips">
+              <span className="attr-chip">{SPECIES_EMOJI[pet.species]} {pet.species === 'other' ? 'Pet' : pet.species[0].toUpperCase() + pet.species.slice(1)}</span>
+              {pet.breed && <span className="attr-chip">{pet.breed}</span>}
+              {pet.color && (
+                <span className="attr-chip">
+                  <span className="attr-swatch" style={{ background: swatchFor(pet.color) }} aria-hidden="true" />
+                  <span style={{ textTransform: 'capitalize' }}>{pet.color}</span>
+                </span>
+              )}
+              {pet.ageYears != null && <span className="attr-chip">{pet.ageYears} yr{pet.ageYears !== 1 ? 's' : ''}</span>}
+            </div>
           </div>
           {pet.status !== 'reunited' && isOwner && (
             <Button variant="secondary" onClick={handleReunited} aria-label="Mark as reunited">
@@ -283,12 +303,6 @@ export function PetDetail() {
               <span className="t-body-m" style={{ fontWeight: 700 }}>{pet.lastSeen.label}</span>
               <span className="t-body-s" style={{ color: 'var(--bark-500)' }}>{timeAgo(pet.lastSeen.at)} · {formatDate(pet.lastSeen.at)}</span>
             </div>
-            {pet.color && (
-              <div className="meta-item">
-                <span className="t-body-s" style={{ color: 'var(--bark-500)' }}>Colour</span>
-                <span className="t-body-m" style={{ fontWeight: 700, textTransform: 'capitalize' }}>{pet.color}</span>
-              </div>
-            )}
             {pet.microchipId && (
               <div className="meta-item">
                 <span className="t-body-s" style={{ color: 'var(--bark-500)' }}>Microchip ID</span>
