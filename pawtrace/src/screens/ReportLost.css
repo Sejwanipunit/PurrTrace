@@ -329,3 +329,10 @@
   font-size: 14px;
 }
 .tag-add-btn:hover { background: var(--sprout-50); }
+
+/* Found-report theme — green accents (coral is reserved for lost/destructive) */
+.report-found .step-active .step-circle {
+  background: var(--sprout-500);
+  box-shadow: 0 4px 12px rgba(111, 184, 51, 0.3);
+}
+.report-found .step-active .step-label { color: var(--sprout-700); }

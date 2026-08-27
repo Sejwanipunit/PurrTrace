@@ -1,9 +1,21 @@
-.fab {
+.fab-wrap {
   position: fixed;
   bottom: calc(72px + max(20px, env(safe-area-inset-bottom)) + 16px);
   right: calc(50% - 220px + 16px);
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+@media (max-width: 440px) {
+  .fab-wrap { right: 16px; }
+}
+
+.fab {
   width: 58px;
   height: 58px;
+  align-self: flex-end;
   border-radius: var(--r-xl);
   background: var(--coral-500);
   color: #fff;
@@ -13,26 +25,56 @@
   align-items: center;
   justify-content: center;
   box-shadow: var(--sh-3);
-  z-index: 99;
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
 }
+.fab svg { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.fab:hover { transform: rotate(12deg) scale(1.05); box-shadow: 0 16px 36px rgba(242, 96, 60, 0.4); }
+.fab:active { transform: scale(0.95); }
+.fab-open { background: var(--bark-700); }
+.fab-open svg { transform: rotate(45deg); }
+.fab-open:hover { transform: scale(1.05); box-shadow: var(--sh-3); }
 
-.fab:hover {
-  transform: rotate(12deg) scale(1.05);
-  box-shadow: 0 16px 36px rgba(242, 96, 60, 0.4);
+/* Chooser */
+.fab-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 98;
+  background: rgba(42, 39, 31, 0.12);
 }
 
-.fab:active {
-  transform: scale(0.95);
+.fab-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
 }
 
-@media (max-width: 440px) {
-  .fab {
-    right: 16px;
-  }
+.fab-action {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 18px;
+  border-radius: var(--r-pill);
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: var(--sh-2);
+  animation: fab-rise 0.18s ease both;
+}
+.fab-action-lost { background: var(--coral-500); }
+.fab-action-found { background: var(--sprout-500); }
+.fab-action-found { animation-delay: 0.02s; }
+
+@keyframes fab-rise {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to { opacity: 1; transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fab { transition: none; }
+  .fab, .fab svg { transition: none; }
   .fab:hover { transform: none; }
+  .fab-action { animation: none; }
 }

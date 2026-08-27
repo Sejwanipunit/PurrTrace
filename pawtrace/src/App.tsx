@@ -26,7 +26,8 @@ function AppContent() {
         <Route path="/map" element={<MapScreen />} />
         <Route path="/search" element={<SearchScreen />} />
         <Route path="/pet/:id" element={<PetDetail />} />
-        <Route path="/report" element={<ReportLost />} />
+        <Route path="/report" element={<ReportLost status="lost" />} />
+        <Route path="/report-found" element={<ReportLost status="found" />} />
         <Route path="/edit/:id" element={<ReportLost />} />
         <Route path="/report-sighting/:id?" element={<ReportSighting />} />
         <Route path="/profile" element={<Profile />} />

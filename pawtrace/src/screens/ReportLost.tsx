@@ -36,9 +36,9 @@ const INITIAL: FormData = {
   microchipId: '', reward: '', photoUrl: '', locationLabel: '', locationLat: '', locationLng: '',
 };
 
-function validateStep1(f: FormData): Errors {
+function validateStep1(f: FormData, isFound: boolean): Errors {
   const e: Errors = {};
-  if (!f.name.trim()) e.name = 'Name is required.';
+  if (!isFound && !f.name.trim()) e.name = 'Name is required.'; // finders often don't know the name
   if (!f.species) e.species = 'Please select a species.';
   return e;
 }
@@ -110,7 +110,7 @@ function TextArea({ label, id, required, error, ...props }: { label: string; id:
   );
 }
 
-export function ReportLost() {
+export function ReportLost({ status = 'lost' }: { status?: 'lost' | 'found' }) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormData>(INITIAL);
   const [errors, setErrors] = useState<Errors>({});
@@ -220,6 +220,7 @@ export function ReportLost() {
   const { id: editId } = useParams<{ id: string }>();
   const editingPet = editId ? pets.find(p => p.id === editId) : undefined;
   const isEdit = Boolean(editId);
+  const isFound = isEdit ? editingPet?.status === 'found' : status === 'found';
   const prefilled = useRef(false);
 
   useEffect(() => {
@@ -308,7 +309,7 @@ export function ReportLost() {
 
   const nextStep = () => {
     if (step === 1) {
-      const e = validateStep1(form);
+      const e = validateStep1(form, isFound);
       if (Object.keys(e).length) { setErrors(e); return; }
     }
     setStep(s => s + 1);
@@ -371,17 +372,19 @@ export function ReportLost() {
         return;
       }
 
+      // Finders often don't know the pet's name — fall back to a friendly stray label.
+      const fallbackName = `Unknown ${form.breed.trim() || (form.species === 'other' ? 'pet' : form.species)}`;
       const input: NewPet = {
-        name: form.name.trim(),
+        name: form.name.trim() || (isFound ? fallbackName : ''),
         species: form.species as Species,
         breed: form.breed.trim() || undefined,
         color: form.color.trim() || undefined,
         ageYears: form.ageYears ? Number(form.ageYears) : undefined,
-        status: 'lost',
+        status: isFound ? 'found' : 'lost',
         photoUrl,
         description: form.description.trim() || undefined,
         microchipId: form.microchipId.trim() || undefined,
-        reward: form.reward.trim() || undefined,
+        reward: isFound ? undefined : (form.reward.trim() || undefined),
         lastSeen: {
           lat,
           lng,
@@ -392,7 +395,7 @@ export function ReportLost() {
         reportedByName: currentUser.name,
       };
       const created = await addPet(input);
-      showToast(`${created.name} has been reported as lost`);
+      showToast(isFound ? `${created.name} reported as found 🐾` : `${created.name} has been reported as lost`);
       navigate(`/pet/${created.id}`);
     } catch {
       setErrors({ locationLabel: 'We couldn’t save that report — please try again.' });
@@ -401,7 +404,7 @@ export function ReportLost() {
   };
 
   return (
-    <div className="report-lost screen-content">
+    <div className={`report-lost screen-content ${isFound ? 'report-found' : ''}`}>
       <header className="report-header">
         <button className="back-btn" onClick={() => step > 1 ? setStep(s => s - 1) : navigate(-1)} aria-label="Go back">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" width="22" height="22">
@@ -409,9 +412,9 @@ export function ReportLost() {
           </svg>
         </button>
         <div>
-          <h1 className="t-headline">{isEdit ? 'Edit report' : 'Report a lost pet'}</h1>
+          <h1 className="t-headline">{isEdit ? 'Edit report' : isFound ? 'Report a found pet' : 'Report a lost pet'}</h1>
           <p className="t-body-s" style={{ color: 'var(--bark-500)' }}>
-            {isEdit ? `Update ${editingPet?.name ?? 'your pet'}’s details` : 'Help us help you find them'}
+            {isEdit ? `Update ${editingPet?.name ?? 'your pet'}’s details` : isFound ? 'Let’s help reunite them' : 'Help us help you find them'}
           </p>
         </div>
       </header>
@@ -490,13 +493,14 @@ export function ReportLost() {
             </div>
 
             <TextField
-              label="Pet's name"
+              label={isFound ? "Pet's name (if you know it)" : "Pet's name"}
               id="name"
-              placeholder="e.g. Bruno"
+              placeholder={isFound ? 'Leave blank if unknown' : 'e.g. Bruno'}
               value={form.name}
               onChange={set('name')}
-              required
+              required={!isFound}
               error={errors.name}
+              hint={isFound ? 'A stray? Leave this blank — we’ll label it for you.' : undefined}
             />
 
             <Button variant="primary" fullWidth onClick={nextStep}>Continue →</Button>
@@ -554,14 +558,16 @@ export function ReportLost() {
               onChange={set('microchipId')}
               hint="15-digit ISO chip number if available"
             />
-            <TextField
-              label="Reward (optional)"
-              id="reward"
-              placeholder="e.g. ₹5,000"
-              value={form.reward}
-              onChange={set('reward')}
-              hint="Offering a reward can help — shown on the pet page and poster"
-            />
+            {!isFound && (
+              <TextField
+                label="Reward (optional)"
+                id="reward"
+                placeholder="e.g. ₹5,000"
+                value={form.reward}
+                onChange={set('reward')}
+                hint="Offering a reward can help — shown on the pet page and poster"
+              />
+            )}
             <div className="step-nav">
               <Button variant="secondary" onClick={() => setStep(1)}>← Back</Button>
               <Button variant="primary" onClick={nextStep}>Continue →</Button>
@@ -578,7 +584,9 @@ export function ReportLost() {
                 <circle cx="12" cy="10" r="3"/>
               </svg>
               <p className="t-body-m" style={{ color: 'var(--bark-700)' }}>
-                Where did you last see <strong>{form.name || 'your pet'}</strong>?
+                {isFound
+                  ? <>Where did you find <strong>{form.name || 'this pet'}</strong>?</>
+                  : <>Where did you last see <strong>{form.name || 'your pet'}</strong>?</>}
               </p>
             </div>
 
@@ -627,10 +635,12 @@ export function ReportLost() {
 
             <div className="step-nav">
               <Button variant="secondary" onClick={() => setStep(2)}>← Back</Button>
-              <Button variant={isEdit ? 'primary' : 'lost'} onClick={submit} disabled={submitting}>
+              <Button variant={(isEdit || isFound) ? 'primary' : 'lost'} onClick={submit} disabled={submitting}>
                 {submitting
                   ? (isEdit ? 'Saving…' : 'Reporting…')
-                  : (isEdit ? 'Save changes' : `Report ${form.name || 'pet'} as lost`)}
+                  : isEdit ? 'Save changes'
+                  : isFound ? `Report ${form.name || 'this pet'} as found`
+                  : `Report ${form.name || 'pet'} as lost`}
               </Button>
             </div>
           </div>
