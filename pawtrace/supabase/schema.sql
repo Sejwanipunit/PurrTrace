@@ -23,6 +23,7 @@ create table if not exists public.pets (
   name             text not null,
   species          text not null check (species in ('dog','cat','other')),
   breed            text,
+  color            text,
   age_years        numeric,
   status           text not null check (status in ('lost','found','searching','reunited')),
   photo_url        text,

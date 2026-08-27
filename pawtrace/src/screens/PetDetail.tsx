@@ -283,6 +283,12 @@ export function PetDetail() {
               <span className="t-body-m" style={{ fontWeight: 700 }}>{pet.lastSeen.label}</span>
               <span className="t-body-s" style={{ color: 'var(--bark-500)' }}>{timeAgo(pet.lastSeen.at)} · {formatDate(pet.lastSeen.at)}</span>
             </div>
+            {pet.color && (
+              <div className="meta-item">
+                <span className="t-body-s" style={{ color: 'var(--bark-500)' }}>Colour</span>
+                <span className="t-body-m" style={{ fontWeight: 700, textTransform: 'capitalize' }}>{pet.color}</span>
+              </div>
+            )}
             {pet.microchipId && (
               <div className="meta-item">
                 <span className="t-body-s" style={{ color: 'var(--bark-500)' }}>Microchip ID</span>

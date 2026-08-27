@@ -10,10 +10,13 @@ import { describePetPhoto } from '../lib/petAI';
 import type { NewPet, Species } from '../types';
 import './ReportLost.css';
 
+const titleCaseWord = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
 interface FormData {
   name: string;
   species: Species | '';
   breed: string;
+  color: string;
   ageYears: string;
   description: string;
   microchipId: string;
@@ -29,7 +32,7 @@ interface Errors {
 }
 
 const INITIAL: FormData = {
-  name: '', species: '', breed: '', ageYears: '', description: '',
+  name: '', species: '', breed: '', color: '', ageYears: '', description: '',
   microchipId: '', reward: '', photoUrl: '', locationLabel: '', locationLat: '', locationLng: '',
 };
 
@@ -123,7 +126,55 @@ export function ReportLost() {
   const [aiStatus, setAiStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [aiMessage, setAiMessage] = useState('');
 
-  // Feature: detect species/breed/description from the photo with Claude vision.
+  // Detected suggestions shown as removable chips (keep or dismiss).
+  interface Tag { id: string; kind: 'species' | 'breed' | 'color'; label: string; value: string; applied: boolean; }
+  const [tags, setTags] = useState<Tag[]>([]);
+
+  const speciesLabel = (s: string) => (s === 'dog' ? 'Dog' : s === 'cat' ? 'Cat' : 'Other');
+
+  // Write the applied chips into the form fields (chips own species/breed/color).
+  const syncFromTags = (list: Tag[]) => {
+    setForm(prev => {
+      const next = { ...prev };
+      (['species', 'breed', 'color'] as const).forEach(kind => {
+        const present = list.filter(t => t.kind === kind);
+        if (present.length === 0) return; // no chip of this kind → leave field untouched
+        const applied = present.find(t => t.applied);
+        next[kind] = (applied?.value ?? '') as never;
+      });
+      return next;
+    });
+    setErrors(prev => { const n = { ...prev }; delete n.species; return n; });
+  };
+
+  const toggleTag = (id: string) => {
+    setTags(prev => {
+      const target = prev.find(t => t.id === id);
+      const next = prev.map(t => {
+        if (t.id === id) return { ...t, applied: !t.applied };
+        // breed chips are mutually exclusive — applying one clears the others
+        if (target?.kind === 'breed' && t.kind === 'breed' && !target.applied) return { ...t, applied: false };
+        return t;
+      });
+      syncFromTags(next);
+      return next;
+    });
+  };
+
+  const removeTag = (id: string) => {
+    setTags(prev => {
+      const removed = prev.find(t => t.id === id);
+      const next = prev.filter(t => t.id !== id);
+      // Dismissing an applied chip clears its field (unless another of its kind is still applied).
+      if (removed?.applied && !next.some(t => t.kind === removed.kind && t.applied)) {
+        setForm(f => ({ ...f, [removed.kind]: '' as never }));
+      }
+      syncFromTags(next);
+      return next;
+    });
+  };
+
+  // Feature: detect species/breed/colour from the photo, on-device (TensorFlow.js).
   const detectFromPhoto = async () => {
     if (!photoFile) return;
     setAiStatus('loading');
@@ -131,19 +182,19 @@ export function ReportLost() {
     try {
       const d = await describePetPhoto(photoFile);
       if (!d) throw new Error('No result');
-      setForm(prev => ({
-        ...prev,
-        species: prev.species || d.species,
-        breed: prev.breed || d.breed,
-        description: prev.description || d.description,
-      }));
-      setErrors(prev => { const n = { ...prev }; delete n.species; return n; });
-      const bits = [d.breed, d.color, d.markings].filter(Boolean).join(' · ');
-      setAiStatus('done');
-      setAiMessage(bits ? `Detected: ${bits}` : 'Details filled from photo');
+      const newTags: Tag[] = [];
+      if (d.species) newTags.push({ id: 'species', kind: 'species', label: speciesLabel(d.species), value: d.species, applied: true });
+      d.breeds.forEach((b, i) => newTags.push({ id: `breed-${i}`, kind: 'breed', label: b, value: b, applied: i === 0 }));
+      if (d.color) newTags.push({ id: 'color', kind: 'color', label: titleCaseWord(d.color), value: d.color, applied: true });
+      setTags(newTags);
+      syncFromTags(newTags);
+      // Short description suggestion (only if the user hasn't written one).
+      setForm(prev => ({ ...prev, description: prev.description || d.description }));
+      setAiStatus(newTags.length ? 'done' : 'error');
+      setAiMessage(newTags.length ? '' : 'Couldn’t recognise the pet — add details yourself.');
     } catch {
       setAiStatus('error');
-      setAiMessage('Couldn’t read the photo — fill the details in yourself.');
+      setAiMessage('Couldn’t read the photo — add the details yourself.');
     }
   };
 
@@ -160,6 +211,7 @@ export function ReportLost() {
       name: editingPet.name,
       species: editingPet.species,
       breed: editingPet.breed ?? '',
+      color: editingPet.color ?? '',
       ageYears: editingPet.ageYears != null ? String(editingPet.ageYears) : '',
       description: editingPet.description ?? '',
       microchipId: editingPet.microchipId ?? '',
@@ -274,6 +326,7 @@ export function ReportLost() {
           name: form.name.trim(),
           species: form.species as Species,
           breed: form.breed.trim() || undefined,
+          color: form.color.trim() || undefined,
           ageYears: form.ageYears ? Number(form.ageYears) : undefined,
           photoUrl,
           description: form.description.trim() || undefined,
@@ -299,6 +352,7 @@ export function ReportLost() {
         name: form.name.trim(),
         species: form.species as Species,
         breed: form.breed.trim() || undefined,
+        color: form.color.trim() || undefined,
         ageYears: form.ageYears ? Number(form.ageYears) : undefined,
         status: 'lost',
         photoUrl,
@@ -373,13 +427,30 @@ export function ReportLost() {
               <>
                 <button
                   type="button"
-                  className={`ai-detect-btn ${aiStatus === 'done' ? 'ai-detect-done' : ''}`}
+                  className={`ai-detect-btn ${tags.length ? 'ai-detect-done' : ''}`}
                   onClick={detectFromPhoto}
                   disabled={aiStatus === 'loading'}
                 >
                   <span className="ai-spark" aria-hidden="true">✨</span>
-                  {aiStatus === 'loading' ? 'Reading photo…' : aiStatus === 'done' ? 'Details filled — tap to redo' : 'Detect details with AI'}
+                  {aiStatus === 'loading' ? 'Reading photo…' : tags.length ? 'Scan photo again' : 'Detect tags with AI'}
                 </button>
+
+                {tags.length > 0 && (
+                  <div className="tag-tray">
+                    <p className="tag-tray-hint t-body-s">Suggested tags — tap to keep or dismiss</p>
+                    <div className="tag-list">
+                      {tags.map(t => (
+                        <span key={t.id} className={`tag-chip tag-${t.kind} ${t.applied ? 'tag-on' : ''}`}>
+                          <button type="button" className="tag-label" onClick={() => toggleTag(t.id)} aria-pressed={t.applied}>
+                            {t.applied && <span aria-hidden="true">✓ </span>}{t.label}
+                          </button>
+                          <button type="button" className="tag-x" onClick={() => removeTag(t.id)} aria-label={`Dismiss ${t.label}`}>×</button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {aiMessage && (
                   <p className={`ai-status t-body-s ${aiStatus === 'error' ? 'ai-status-error' : ''}`} role="status">
                     {aiMessage}
@@ -429,6 +500,7 @@ export function ReportLost() {
         {step === 2 && (
           <div className="step-content">
             <TextField label="Breed (optional)" id="breed" placeholder="e.g. Labrador" value={form.breed} onChange={set('breed')} />
+            <TextField label="Colour (optional)" id="color" placeholder="e.g. golden, black & white" value={form.color} onChange={set('color')} />
             <TextField label="Age (years)" id="ageYears" type="number" min="0" max="30" placeholder="e.g. 3" value={form.ageYears} onChange={set('ageYears')} />
             <TextArea label="Description" id="description" placeholder="Describe markings, collar, personality…" value={form.description} onChange={set('description')} />
             <TextField

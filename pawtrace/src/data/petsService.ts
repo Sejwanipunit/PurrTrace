@@ -25,6 +25,7 @@ export function rowToPet(r: any, sightings: Sighting[]): Pet {
     name: r.name,
     species: r.species,
     breed: r.breed ?? undefined,
+    color: r.color ?? undefined,
     ageYears: r.age_years ?? undefined,
     status: r.status,
     photoUrl: r.photo_url ?? undefined,
@@ -108,6 +109,7 @@ export async function addPet(input: NewPet): Promise<Pet> {
         name: input.name,
         species: input.species,
         breed: input.breed ?? null,
+        color: input.color ?? null,
         age_years: input.ageYears ?? null,
         status: input.status,
         photo_url: input.photoUrl ?? null,
@@ -133,6 +135,7 @@ export async function addPet(input: NewPet): Promise<Pet> {
     name: input.name,
     species: input.species,
     breed: input.breed,
+    color: input.color,
     ageYears: input.ageYears,
     status: input.status,
     photoUrl: input.photoUrl,
@@ -191,6 +194,7 @@ export async function updatePet(id: string, patch: Partial<NewPet>): Promise<Pet
     if (patch.name !== undefined) row.name = patch.name;
     if (patch.species !== undefined) row.species = patch.species;
     if ('breed' in patch) row.breed = patch.breed ?? null;
+    if ('color' in patch) row.color = patch.color ?? null;
     if ('ageYears' in patch) row.age_years = patch.ageYears ?? null;
     if (patch.status !== undefined) row.status = patch.status;
     if ('photoUrl' in patch) row.photo_url = patch.photoUrl ?? null;
@@ -221,6 +225,7 @@ export async function updatePet(id: string, patch: Partial<NewPet>): Promise<Pet
           name: patch.name ?? p.name,
           species: patch.species ?? p.species,
           breed: 'breed' in patch ? patch.breed : p.breed,
+          color: 'color' in patch ? patch.color : p.color,
           ageYears: 'ageYears' in patch ? patch.ageYears : p.ageYears,
           status: patch.status ?? p.status,
           photoUrl: 'photoUrl' in patch ? patch.photoUrl : p.photoUrl,

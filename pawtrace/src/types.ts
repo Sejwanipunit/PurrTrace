@@ -17,6 +17,7 @@ export interface Pet {
   name: string;
   species: Species;
   breed?: string;
+  color?: string;            // e.g. "golden", "black & white"
   ageYears?: number;
   status: PetStatus;
   photoUrl?: string;
@@ -36,6 +37,7 @@ export interface NewPet {
   name: string;
   species: Species;
   breed?: string;
+  color?: string;
   ageYears?: number;
   status: PetStatus;
   photoUrl?: string;

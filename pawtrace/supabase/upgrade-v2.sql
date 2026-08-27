@@ -43,3 +43,6 @@ $$;
 -- ---------- v3: reward field on reports ----------
 -- Optional reward offer shown on the pet page and the shareable poster.
 alter table public.pets add column if not exists reward text;
+
+-- ---------- v4: colour field on reports (from AI auto-tagging) ----------
+alter table public.pets add column if not exists color text;

@@ -275,3 +275,41 @@
 @media (prefers-reduced-motion: reduce) {
   .ai-detect-btn { transition: none; }
 }
+
+/* AI suggestion tags (chips) */
+.tag-tray { margin-bottom: var(--s-sm); }
+.tag-tray-hint { color: var(--bark-500); margin-bottom: var(--s-sm); padding: 0 2px; }
+.tag-list { display: flex; flex-wrap: wrap; gap: var(--s-sm); }
+
+.tag-chip {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  transition: border-color 0.15s, background 0.15s;
+}
+.tag-chip .tag-label {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--bark-700);
+  padding: 7px 6px 7px 13px;
+}
+.tag-chip .tag-x {
+  font-size: 16px;
+  line-height: 1;
+  color: var(--bark-500);
+  padding: 0 11px 0 6px;
+  display: grid;
+  place-items: center;
+}
+.tag-chip .tag-x:hover { color: var(--coral-700); }
+
+/* Applied (kept) state — filled, coloured by kind */
+.tag-chip.tag-on { border-color: transparent; }
+.tag-chip.tag-on.tag-species { background: var(--sprout-100); }
+.tag-chip.tag-on.tag-breed { background: var(--lagoon-50); }
+.tag-chip.tag-on.tag-color { background: var(--sun-100); }
+.tag-chip.tag-on .tag-label { color: var(--bark-900); }

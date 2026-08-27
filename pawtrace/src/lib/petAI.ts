@@ -1,12 +1,11 @@
 import type { Pet, Species } from '../types';
 import { classify, embed, loadImageEl, cosineSimilarity, dominantColor } from './petVision';
 
-export interface PetDescription {
+export interface PetDetection {
   species: Species;
-  breed: string;
+  breeds: string[];   // best guesses, most likely first
   color: string;
-  markings: string;
-  description: string;
+  description: string; // short, clean
 }
 
 export interface PetMatch {
@@ -38,29 +37,26 @@ function titleCase(s: string): string {
   return s.replace(/\b\w/g, c => c.toUpperCase());
 }
 
-/** Identify species/breed/colour + a draft description from a photo, entirely on-device. */
-export async function describePetPhoto(file: File): Promise<PetDescription | null> {
+/** Detect species / breed guesses / colour + a short description from a photo, on-device. */
+export async function describePetPhoto(file: File): Promise<PetDetection | null> {
   const img = await loadImageEl(file);
-  const results = await classify(img, 5);
+  const results = await classify(img, 6);
   if (!results.length) return null;
 
   const labels = results.map(r => r.className);
   const species = speciesFromLabels(labels);
   const color = dominantColor(img);
 
-  // Best label as the breed guess (first segment before a comma).
-  const topBreed = titleCase(results[0].className.split(',')[0].trim());
-  const breed = species === 'other' ? '' : topBreed;
+  // Up to 3 distinct breed guesses (first segment before a comma), most likely first.
+  const breeds = species === 'other'
+    ? []
+    : [...new Set(results.map(r => titleCase(r.className.split(',')[0].trim())))].slice(0, 3);
 
-  let description: string;
-  if (species === 'other') {
-    description = 'An animal — the breed couldn’t be auto-detected. Please add any details you can.';
-  } else {
-    const colorPhrase = color ? `, ${color} in colour` : '';
-    description = `Looks like a ${breed || species}${colorPhrase}. Auto-detected on your device — please double-check and add distinctive markings.`;
-  }
+  // Short, clean description — no "AI generated" boilerplate.
+  const primary = breeds[0] || (species === 'other' ? 'pet' : species);
+  const description = color ? `${titleCase(color)} ${primary}.` : `${titleCase(primary)}.`;
 
-  return { species, breed, color, markings: '', description };
+  return { species, breeds, color, description };
 }
 
 interface MatchSubject { imageUrl: string; name?: string; species?: string; breed?: string; }
