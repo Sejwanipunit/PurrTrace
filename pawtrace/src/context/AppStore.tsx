@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import type { Pet, Sighting, User, NewPet, NewSighting } from '../types';
+import type { Pet, Sighting, User, NewPet, NewSighting, AppNotification } from '../types';
 import * as service from '../data/petsService';
 import { rowToPet, rowToSighting } from '../data/petsService';
+import { listNotifications, markAllNotificationsRead as svcMarkAllRead, markNotificationRead as svcMarkRead, rowToNotification } from '../data/notificationsService';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { haversine } from '../lib/distance';
 import { getCurrentLocation, type Coords } from '../lib/geolocation';
@@ -24,6 +25,10 @@ interface AppState {
   nearbyAlerts: boolean;
   /** Whether the user opted into sharing their location for distance display. */
   shareLocation: boolean;
+  notifications: AppNotification[];
+  unreadCount: number;
+  markAllNotificationsRead: () => Promise<void>;
+  markNotificationRead: (id: string) => Promise<void>;
   refreshPets: () => Promise<void>;
   addPet: (input: NewPet) => Promise<Pet>;
   updatePet: (id: string, patch: Partial<NewPet>) => Promise<Pet | undefined>;
@@ -58,8 +63,11 @@ export function AppStore({ children }: { children: React.ReactNode }) {
     return localStorage.getItem('shareLocation') === 'true';
   });
   const [userCoords, setUserCoords] = useState<Coords | null>(null);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   const currentUser: User = user ?? GUEST;
+
+  const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
 
   // Refs so the realtime callbacks always see the latest pets/user/settings without resubscribing.
   const petsRef = useRef<Pet[]>([]);
@@ -189,6 +197,12 @@ export function AppStore({ children }: { children: React.ReactNode }) {
           );
         }
       })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${user.id}` }, (payload: any) => {
+        const n = rowToNotification(payload.new);
+        setNotifications(prev => (prev.some(x => x.id === n.id) ? prev : [n, ...prev]));
+        showToast(n.title); // in-app pop-up while the user is active
+      })
       .subscribe();
 
     return () => { sb.removeChannel(channel); };
@@ -230,6 +244,22 @@ export function AppStore({ children }: { children: React.ReactNode }) {
     await refreshProfile();
   }, [user?.id, refreshProfile]);
 
+  // Load stored notifications on sign-in (so the unread count persists across sessions).
+  useEffect(() => {
+    if (!user) { setNotifications([]); return; }
+    listNotifications().then(setNotifications).catch(() => {});
+  }, [user]);
+
+  const markAllNotificationsRead = useCallback(async () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    await svcMarkAllRead().catch(() => {});
+  }, []);
+
+  const markNotificationRead = useCallback(async (id: string) => {
+    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
+    await svcMarkRead(id).catch(() => {});
+  }, []);
+
   const setDarkMode = useCallback((v: boolean) => { setDarkModeState(v); }, []);
   const setNearbyAlerts = useCallback((v: boolean) => {
     setNearbyAlertsState(v);
@@ -243,7 +273,7 @@ export function AppStore({ children }: { children: React.ReactNode }) {
   const setShareLocation = useCallback((v: boolean) => { setShareLocationState(v); }, []);
 
   return (
-    <AppContext.Provider value={{ pets: enrichedPets, loading, error, currentUser, darkMode, toast, nearbyAlerts, shareLocation, refreshPets, addPet, updatePet, deletePet, addSighting, markReunited, setDarkMode, setNearbyAlerts, setShareLocation, showToast }}>
+    <AppContext.Provider value={{ pets: enrichedPets, loading, error, currentUser, darkMode, toast, nearbyAlerts, shareLocation, notifications, unreadCount, markAllNotificationsRead, markNotificationRead, refreshPets, addPet, updatePet, deletePet, addSighting, markReunited, setDarkMode, setNearbyAlerts, setShareLocation, showToast }}>
       {children}
     </AppContext.Provider>
   );

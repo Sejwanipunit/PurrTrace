@@ -46,3 +46,34 @@ alter table public.pets add column if not exists reward text;
 
 -- ---------- v4: colour field on reports (from AI auto-tagging) ----------
 alter table public.pets add column if not exists color text;
+
+-- ---------- v5: in-app notifications ----------
+create table if not exists public.notifications (
+  id           uuid primary key default gen_random_uuid(),
+  recipient_id uuid not null references public.profiles (id) on delete cascade,
+  type         text not null,
+  title        text not null,
+  body         text,
+  pet_id       uuid references public.pets (id) on delete cascade,
+  read         boolean not null default false,
+  created_at   timestamptz not null default now()
+);
+create index if not exists notifications_recipient_idx on public.notifications (recipient_id, created_at desc);
+
+alter table public.notifications enable row level security;
+drop policy if exists "notifications_select" on public.notifications;
+drop policy if exists "notifications_update" on public.notifications;
+drop policy if exists "notifications_delete" on public.notifications;
+create policy "notifications_select" on public.notifications for select using (auth.uid() = recipient_id);
+create policy "notifications_update" on public.notifications for update using (auth.uid() = recipient_id) with check (auth.uid() = recipient_id);
+create policy "notifications_delete" on public.notifications for delete using (auth.uid() = recipient_id);
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'notifications'
+  ) then
+    alter publication supabase_realtime add table public.notifications;
+  end if;
+end $$;

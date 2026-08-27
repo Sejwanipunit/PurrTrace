@@ -5,6 +5,7 @@ import { PetCard } from '../components/PetCard';
 import { Chip } from '../components/Chip';
 import { AlertBanner } from '../components/AlertBanner';
 import { PawPath } from '../components/PawPath';
+import { NotificationBell } from '../components/NotificationBell';
 import type { Pet } from '../types';
 import { isFreshReport } from '../lib/time';
 import './HomeFeed.css';
@@ -62,11 +63,14 @@ export function HomeFeed() {
             <p className="t-body-s" style={{ color: 'var(--bark-500)' }}>{greeting}</p>
             <h1 className="t-headline" style={{ color: 'var(--bark-900)' }}>{currentUser.name} 👋</h1>
           </div>
-          <div className="home-avatar" aria-label={`Avatar for ${currentUser.name}`}>
-            {currentUser.avatarUrl
-              ? <img src={currentUser.avatarUrl} alt={currentUser.name} />
-              : <span style={{ fontFamily: 'Fredoka', fontWeight: 600, fontSize: 18 }}>{currentUser.name[0]}</span>
-            }
+          <div className="home-header-actions">
+            <NotificationBell />
+            <div className="home-avatar" aria-label={`Avatar for ${currentUser.name}`}>
+              {currentUser.avatarUrl
+                ? <img src={currentUser.avatarUrl} alt={currentUser.name} />
+                : <span style={{ fontFamily: 'Fredoka', fontWeight: 600, fontSize: 18 }}>{currentUser.name[0]}</span>
+              }
+            </div>
           </div>
         </div>
 

@@ -67,6 +67,21 @@ create table if not exists public.push_subscriptions (
 );
 create index if not exists push_subs_user_idx on public.push_subscriptions (user_id);
 
+-- ---------- notifications ----------
+-- In-app notifications (e.g. "a found dog was reported near your lost pet").
+-- Inserted by the push-notify Edge Function (service role); users read/update their own.
+create table if not exists public.notifications (
+  id           uuid primary key default gen_random_uuid(),
+  recipient_id uuid not null references public.profiles (id) on delete cascade,
+  type         text not null,
+  title        text not null,
+  body         text,
+  pet_id       uuid references public.pets (id) on delete cascade,
+  read         boolean not null default false,
+  created_at   timestamptz not null default now()
+);
+create index if not exists notifications_recipient_idx on public.notifications (recipient_id, created_at desc);
+
 -- ============================================================================
 -- Auto-create a profile row when a new auth user signs up (Google OAuth, etc.)
 -- ============================================================================
@@ -100,6 +115,16 @@ alter table public.profiles           enable row level security;
 alter table public.pets               enable row level security;
 alter table public.sightings          enable row level security;
 alter table public.push_subscriptions enable row level security;
+alter table public.notifications      enable row level security;
+
+-- notifications — each user reads/updates only their own; inserts come from the
+-- Edge Function using the service role (which bypasses RLS).
+drop policy if exists "notifications_select" on public.notifications;
+drop policy if exists "notifications_update" on public.notifications;
+drop policy if exists "notifications_delete" on public.notifications;
+create policy "notifications_select" on public.notifications for select using (auth.uid() = recipient_id);
+create policy "notifications_update" on public.notifications for update using (auth.uid() = recipient_id) with check (auth.uid() = recipient_id);
+create policy "notifications_delete" on public.notifications for delete using (auth.uid() = recipient_id);
 
 -- push_subscriptions — each user manages only their own devices
 drop policy if exists "push_subs_select" on public.push_subscriptions;
@@ -196,5 +221,11 @@ begin
     where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'sightings'
   ) then
     alter publication supabase_realtime add table public.sightings;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'notifications'
+  ) then
+    alter publication supabase_realtime add table public.notifications;
   end if;
 end $$;

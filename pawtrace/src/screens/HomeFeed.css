@@ -114,3 +114,9 @@
 @media (prefers-reduced-motion: reduce) {
   .skeleton-card { animation: none; }
 }
+
+.home-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-sm);
+}

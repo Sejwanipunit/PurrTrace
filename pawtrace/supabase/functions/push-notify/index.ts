@@ -86,6 +86,17 @@ async function sendToUsers(userIds: string[], payload: PushPayload): Promise<num
   return sent;
 }
 
+// Persist an in-app notification (shown in the bell menu, survives sign-out/in).
+async function insertNotification(recipientId: string, n: { type: string; title: string; body: string; petId: string }) {
+  await supabase.from('notifications').insert({
+    recipient_id: recipientId,
+    type: n.type,
+    title: n.title,
+    body: n.body,
+    pet_id: n.petId,
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
@@ -117,11 +128,10 @@ Deno.serve(async (req) => {
       .eq('id', record.pet_id)
       .single();
     if (pet?.reported_by && pet.reported_by !== record.reported_by) {
-      sent = await sendToUsers([pet.reported_by], {
-        title: `New sighting of ${pet.name}`,
-        body: record.note || `${pet.name} was just spotted — tap to see where.`,
-        url: `/pet/${pet.id}`,
-      });
+      const title = `New sighting of ${pet.name}`;
+      const body = record.note || `${pet.name} was just spotted — tap to see where.`;
+      await insertNotification(pet.reported_by, { type: 'new_sighting', title, body, petId: pet.id });
+      sent = await sendToUsers([pet.reported_by], { title, body, url: `/pet/${pet.id}` });
     }
   } else if (table === 'pets' && record.status === 'found') {
     const cutoff = new Date(Date.now() - REPORT_TTL_DAYS * 86400000).toISOString();
@@ -141,11 +151,10 @@ Deno.serve(async (req) => {
       }
     }
     for (const [ownerId, petName] of owners) {
-      sent += await sendToUsers([ownerId], {
-        title: `A found pet was reported near ${petName}`,
-        body: `A ${record.breed || record.species} was found close to where you lost ${petName}. Tap to check.`,
-        url: `/pet/${record.id}`,
-      });
+      const title = `A found pet was reported near ${petName}`;
+      const body = `A ${record.breed || record.species} was found close to where you lost ${petName}. Tap to check.`;
+      await insertNotification(ownerId, { type: 'found_nearby', title, body, petId: record.id });
+      sent += await sendToUsers([ownerId], { title, body, url: `/pet/${record.id}` });
     }
   }
 

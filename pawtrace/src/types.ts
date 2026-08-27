@@ -66,3 +66,13 @@ export interface User {
   avatarUrl?: string;
   reunitedCount: number;
 }
+
+export interface AppNotification {
+  id: string;
+  type: string;       // 'found_nearby' | 'new_sighting'
+  title: string;
+  body?: string;
+  petId?: string;
+  read: boolean;
+  createdAt: string;
+}

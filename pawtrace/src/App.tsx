@@ -12,6 +12,7 @@ import { PetDetail } from './screens/PetDetail';
 import { ReportLost } from './screens/ReportLost';
 import { ReportSighting } from './screens/ReportSighting';
 import { Profile } from './screens/Profile';
+import { NotificationsScreen } from './screens/NotificationsScreen';
 import { Login } from './screens/Login';
 import './styles/tokens.css';
 import './styles/base.css';
@@ -31,6 +32,7 @@ function AppContent() {
         <Route path="/edit/:id" element={<ReportLost />} />
         <Route path="/report-sighting/:id?" element={<ReportSighting />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/notifications" element={<NotificationsScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />
