@@ -313,3 +313,19 @@
 .tag-chip.tag-on.tag-breed { background: var(--lagoon-50); }
 .tag-chip.tag-on.tag-color { background: var(--sun-100); }
 .tag-chip.tag-on .tag-label { color: var(--bark-900); }
+
+/* Tile add-row */
+.tag-add-row { display: flex; gap: var(--s-sm); margin-top: var(--s-sm); }
+.tag-add-input { flex: 1; }
+.tag-add-btn {
+  flex-shrink: 0;
+  padding: 0 var(--s-md);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1.5px solid var(--sprout-300);
+  color: var(--sprout-700);
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+}
+.tag-add-btn:hover { background: var(--sprout-50); }
