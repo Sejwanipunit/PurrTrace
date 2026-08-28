@@ -154,6 +154,22 @@ export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', h
       // Plot each sighting as a small dot where it actually happened.
       if (showSightings) {
         pet.sightings.forEach(s => {
+          // Translucent "probable area" circle — a pet can wander from where it was
+          // last spotted, so the uncertainty grows the longer ago the sighting was.
+          const hours = Math.max(0, (Date.now() - new Date(s.at).getTime()) / 3_600_000);
+          const radiusM = Math.min(1500, Math.max(200, 200 + hours * 120));
+          const area = L.circle([s.lat, s.lng], {
+            radius: radiusM,
+            color: '#F2603C',
+            weight: 1,
+            opacity: 0.4,
+            fillColor: '#F2603C',
+            fillOpacity: 0.08,
+            interactive: false,
+          });
+          area.addTo(map);
+          overlaysRef.current.push(area);
+
           const dot = L.circleMarker([s.lat, s.lng], {
             radius: 7,
             color: '#FFFFFF',
