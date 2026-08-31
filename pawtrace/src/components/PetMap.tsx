@@ -24,7 +24,9 @@ const STATUS_COLORS: Record<string, string> = {
   reunited: '#3EA094',
 };
 
-function createDivIcon(status: string, isHighlighted = false): L.DivIcon {
+const SPECIES_GLYPH: Record<string, string> = { dog: '🐶', cat: '🐱', other: '🐾' };
+
+function createDivIcon(species: string, status: string, isHighlighted = false): L.DivIcon {
   const color = STATUS_COLORS[status] || '#6FB833';
   const pulse = status === 'lost' ? `
     <style>
@@ -42,15 +44,9 @@ function createDivIcon(status: string, isHighlighted = false): L.DivIcon {
     "></div>
   ` : '';
 
-  const pawSvg = `<svg viewBox="0 0 24 24" fill="${color}" width="16" height="16" style="transform:rotate(-45deg)">
-    <ellipse cx="12" cy="16" rx="6" ry="5"/>
-    <circle cx="5" cy="9" r="2.4"/>
-    <circle cx="19" cy="9" r="2.4"/>
-    <circle cx="9" cy="5" r="2.2"/>
-    <circle cx="15" cy="5" r="2.2"/>
-  </svg>`;
-
+  const glyph = SPECIES_GLYPH[species] || '🐾';
   const size = isHighlighted ? 44 : 38;
+  const fontSize = isHighlighted ? 21 : 18;
   const html = `
     <div style="position:relative;width:${size}px;height:${size}px;">
       ${pulse}
@@ -64,9 +60,7 @@ function createDivIcon(status: string, isHighlighted = false): L.DivIcon {
         display:flex;align-items:center;justify-content:center;
         position:relative;z-index:1;
       ">
-        <div style="transform:rotate(45deg);display:flex;align-items:center;justify-content:center;">
-          ${pawSvg}
-        </div>
+        <div style="transform:rotate(45deg);font-size:${fontSize}px;line-height:1;">${glyph}</div>
       </div>
     </div>
   `;
@@ -78,6 +72,24 @@ function createDivIcon(status: string, isHighlighted = false): L.DivIcon {
     iconAnchor: [size / 2, size],
     popupAnchor: [0, -size],
   });
+}
+
+// Offset a coordinate by a distance in metres (north/east).
+function offsetLatLng(lat: number, lng: number, dNorthM: number, dEastM: number): [number, number] {
+  const dLat = dNorthM / 111320;
+  const dLng = dEastM / (111320 * Math.cos((lat * Math.PI) / 180));
+  return [lat + dLat, lng + dLng];
+}
+
+// A single animated paw print (rotated to face the walking direction, staggered fade).
+function pawPrintIcon(rotationDeg: number, delay: number): L.DivIcon {
+  const html = `<div style="transform:rotate(${rotationDeg}deg);">
+    <div class="pt-walk-paw" style="animation-delay:${delay}s;">
+      <svg viewBox="0 0 24 24" fill="#F2603C" width="15" height="15">
+        <ellipse cx="12" cy="16" rx="6" ry="5"/><circle cx="5" cy="9" r="2.4"/><circle cx="19" cy="9" r="2.4"/><circle cx="9" cy="5" r="2.2"/><circle cx="15" cy="5" r="2.2"/>
+      </svg>
+    </div></div>`;
+  return L.divIcon({ html, className: '', iconSize: [15, 15], iconAnchor: [7, 7] });
 }
 
 export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', highlightId, showSightings = false, focusCoord }: PetMapProps) {
@@ -96,12 +108,12 @@ export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', h
       zoomControl: true,
       attributionControl: true,
     });
-    // Soft, warm-toned basemap (CartoDB Voyager — free, no API key, pastel palette
-    // with green parks that harmonizes with the PawTrace brand). Falls back gracefully.
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20,
+    // Standard OpenStreetMap tiles — free, no API key (CARTO's demo tiles now
+    // require one). A warm CSS filter in PetMap.css keeps them on-brand.
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      subdomains: 'abc',
+      maxZoom: 19,
     }).addTo(map);
     // Without an explicit center, frame the actual reports instead of a fixed city.
     if (!center && pets.length > 0) {
@@ -128,7 +140,7 @@ export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', h
     pets.forEach(pet => {
       const isHighlighted = pet.id === highlightId;
       const marker = L.marker([pet.lastSeen.lat, pet.lastSeen.lng], {
-        icon: createDivIcon(pet.status, isHighlighted),
+        icon: createDivIcon(pet.species, pet.status, isHighlighted),
         title: pet.name,
         alt: `${pet.name} - ${pet.status}`,
       });
@@ -169,6 +181,17 @@ export function PetMap({ pets, center, zoom = 14, onPinClick, height = '100%', h
           });
           area.addTo(map);
           overlaysRef.current.push(area);
+
+          // A cute little trail of paw prints "walking" inside the possible area.
+          const walk = Math.min(radiusM * 0.5, 220);
+          const headingDeg = 35; // up-and-to-the-right
+          const rad = (headingDeg * Math.PI) / 180;
+          [0.35, 0.62, 0.9].forEach((frac, i) => {
+            const pos = offsetLatLng(s.lat, s.lng, Math.cos(rad) * walk * frac, Math.sin(rad) * walk * frac);
+            const paw = L.marker(pos, { icon: pawPrintIcon(headingDeg, i * 0.5), interactive: false, keyboard: false });
+            paw.addTo(map);
+            overlaysRef.current.push(paw);
+          });
 
           const dot = L.circleMarker([s.lat, s.lng], {
             radius: 7,

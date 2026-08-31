@@ -60,3 +60,16 @@
 [data-theme="dark"] .pet-map .leaflet-control-attribution {
   background: rgba(38, 36, 28, 0.8);
 }
+
+/* Animated paw prints inside a sighting's "possible area" circle */
+@keyframes ptWalk {
+  0%, 72%, 100% { opacity: 0; transform: scale(0.55); }
+  18%, 44%      { opacity: 0.9; transform: scale(1); }
+}
+.pt-walk-paw {
+  transform-origin: center;
+  animation: ptWalk 3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pt-walk-paw { animation: none; opacity: 0.7; }
+}
